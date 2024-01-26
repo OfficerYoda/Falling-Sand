@@ -5,39 +5,37 @@ import java.awt.*;
 
 public class GridDrawer extends JFrame {
 
-    public GridDrawer() {
-        int cellSize = 10;
-        int gridWidth = 600;
-        int gridHeight = 450;
-        int borderGap = 50;
+    private final GridPanel gridPanel;
+
+    public GridDrawer(Grid grid, int cellSize, int borderGap) {
 
         setTitle("Grid Drawer");
-        setSize(gridWidth + 2 * borderGap, gridHeight + 3 * borderGap);
+        setSize(grid.getWidth() * cellSize + 2 * borderGap, grid.getHeight() * cellSize + 3 * borderGap);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
-        GridPanel gridPanel = new GridPanel(cellSize, gridWidth, gridHeight, borderGap);
+        gridPanel = new GridPanel(grid, cellSize, borderGap);
         add(gridPanel);
 
-        setVisible(true);
+        addMouseMotionListener(new GridListener(grid, cellSize, borderGap));
 
+        setVisible(true);
     }
 
-    public static void main(String[] args) {
-        SwingUtilities.invokeLater(GridDrawer::new);
+    public void repaintGrid() {
+        gridPanel.repaint();
     }
 }
 
 class GridPanel extends JPanel {
 
+    private final Grid grid;
     private final int cellSize;
-    private final int gridWidth;
-    private final int gridHeight;
     private final int borderGap;
 
-    GridPanel(int cellSize, int gridWidth, int gridHeight, int borderGap) {
+
+    public GridPanel(Grid grid, int cellSize, int borderGap) {
+        this.grid = grid;
         this.cellSize = cellSize;
-        this.gridWidth = gridWidth;
-        this.gridHeight = gridHeight;
         this.borderGap = borderGap;
         setBackground(Color.black);
     }
@@ -46,17 +44,32 @@ class GridPanel extends JPanel {
     protected void paintComponent(Graphics g) {
         super.paintComponent(g);
 
-        g.setColor(Color.WHITE);
+//        Color randomColor = new Color((int) (Math.random() * 0x1000000));
+        g.setColor(Color.white);
+
+        final int maxX = borderGap + grid.getWidth() * cellSize;
+        final int maxY = borderGap + grid.getHeight() * cellSize;
 
         // Draw horizontal lines
-        for(int y = 0; y <= gridHeight / cellSize; y++) {
-            g.drawLine(borderGap, borderGap + y * cellSize, borderGap + gridWidth, borderGap + y * cellSize);
+        for(int y = 0; y <= grid.getHeight(); y++) {
+            g.drawLine(
+                    borderGap, borderGap + y * cellSize,
+                    maxX, borderGap + y * cellSize);
         }
 
         // Draw vertical lines
-        for(int x = 0; x <= gridWidth / cellSize; x++) {
-            g.drawLine(borderGap + x * cellSize, borderGap, borderGap + x * cellSize, borderGap + gridHeight);
+        for(int x = 0; x <= grid.getWidth(); x++) {
+            g.drawLine(
+                    borderGap + x * cellSize, borderGap,
+                    borderGap + x * cellSize, maxY);
         }
 
+        for(int x = 0; x < grid.getWidth(); x++) {
+            for(int y = 0; y < grid.getHeight(); y++) {
+                if(grid.isEmpty(x, y)) continue;
+                g.setColor(Color.white);
+                g.fillRect(borderGap + x * cellSize , borderGap + y * cellSize, cellSize, cellSize);
+            }
+        }
     }
 }
