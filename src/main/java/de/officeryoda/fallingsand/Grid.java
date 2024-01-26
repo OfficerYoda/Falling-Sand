@@ -13,14 +13,16 @@ import java.util.concurrent.CountDownLatch;
  */
 public class Grid {
 
-    public static final int SAND_COLOR = Color.decode("#dcb159").getRGB();
+    public static final Color SAND_COLOR = Color.decode("#dcb159");
+    public static final int SAND_COLOR_RGB = Color.decode("#dcb159").getRGB();
     public static int updatesPerSecond = 45;
-    public static int updateInterval= (int) (1f / updatesPerSecond * 1000); // time in ms
+    public static int updateInterval = (int) (1f / updatesPerSecond * 1000); // time in ms
 
     private final int width;
     private final int height;
     private ArrayList<Integer> grid;
     private GridDrawer gridDrawer;
+    private int cursorIndex = -1;
 
     /**
      * Constructs a Grid with the specified width and height.
@@ -28,19 +30,16 @@ public class Grid {
      * @param width  The width of the grid.
      * @param height The height of the grid.
      */
-    public Grid(int width, int height) {
-        this.width = width;
-        this.height = height;
+    public Grid(int width, int height, int cellSize) {
+        this.width = width - width % cellSize; // mod to get rid of any extra
+        this.height = height - height % cellSize; // mod to get rid of any extra
         this.grid = new ArrayList<>(Collections.nCopies(width * height, 0));
-
-        final int cellSize = 10;
-        final int borderGap = 50;
 
         // Use CountDownLatch for synchronization
         CountDownLatch latch = new CountDownLatch(1);
 
         SwingUtilities.invokeLater(() -> {
-            gridDrawer = new GridDrawer(this, cellSize, 50);
+            gridDrawer = new GridDrawer(this, cellSize);
             latch.countDown(); // Signal that initialization is complete
         });
 
@@ -62,7 +61,7 @@ public class Grid {
 
     private void update() {
         // backward to not double apply gravity to a particle
-        for (int i = this.grid.size() - 1; i > 0; i--) {
+        for(int i = this.grid.size() - 1; i >= 0; i--) {
             int x = i % width;
             int y = i / width;
 
@@ -157,5 +156,13 @@ public class Grid {
      */
     public int getHeight() {
         return height;
+    }
+
+    public void setCursorIndex(int cursorIndex) {
+        this.cursorIndex = cursorIndex;
+    }
+
+    public int getCursorIndex() {
+        return this.cursorIndex;
     }
 }

@@ -11,24 +11,26 @@ public class GridListener extends MouseAdapter {
 
     private final Grid grid;
     private final int cellSize;
-    private final int borderGap;
     private final JFrame jFrame;
-
     private final Timer timer;
 
-    public GridListener(Grid grid, int cellSize, int borderGap, JFrame jFrame) {
+    private boolean isLeftPressed;
+
+    public GridListener(Grid grid, int cellSize, JFrame jFrame) {
         this.grid = grid;
         this.cellSize = cellSize;
-        this.borderGap = borderGap;
         this.jFrame = jFrame;
+        this.isLeftPressed = false;
 
-        timer = new Timer(Grid.updateInterval, new ActionListener() {
+        this.timer = new Timer(Grid.updateInterval, new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
                 // Call your method here
                 spawn();
             }
         });
+
+        this.timer.start();
     }
 
     public static int varyColor(int color) {
@@ -49,26 +51,37 @@ public class GridListener extends MouseAdapter {
         int x = mousePos.x;
         int y = mousePos.y;
 
-        x -= borderGap;
-        x -= cellSize / 2;
-        y -= borderGap;
-        y -= 30; // top window bar
+        x -= cellSize / 2 + cellSize;
+        y += cellSize / 2 + cellSize;
+        y -= GridDrawer.TITLE_BAR_HEIGHT;
 
-        if(x < 0 || x > grid.getWidth() * cellSize) return;
-        if(y < 0 || y > grid.getHeight() * cellSize) return;
+        if(x < 0 || x > grid.getWidth() * cellSize ||
+                y < 0 || y > grid.getHeight() * cellSize) {
+            grid.setCursorIndex(-1);
+            return;
+        }
 
-        grid.set(x / cellSize, y / cellSize, varyColor(Grid.SAND_COLOR));
+        grid.setCursorIndex(x / cellSize + y / cellSize * grid.getWidth());
+
+        if(!isLeftPressed) return;
+        grid.set(x / cellSize, y / cellSize, varyColor(Grid.SAND_COLOR_RGB));
     }
 
     @Override
     public void mousePressed(MouseEvent e) {
-        // Start the timer when the mouse is pressed
-        timer.start();
+        isLeftPressed = true;
+//        timer.start();
     }
 
     @Override
     public void mouseReleased(MouseEvent e) {
-        // Stop the timer when the mouse is released
-        timer.stop();
+        isLeftPressed = false;
+//        timer.stop();
+    }
+
+    @Override
+    public void mouseExited(MouseEvent e) {
+        super.mouseExited(e);
+        grid.setCursorIndex(-1);
     }
 }
