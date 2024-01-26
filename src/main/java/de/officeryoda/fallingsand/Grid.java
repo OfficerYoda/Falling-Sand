@@ -15,7 +15,7 @@ public class Grid {
 
     public static final Color SAND_COLOR = Color.decode("#dcb159");
     public static final int SAND_COLOR_RGB = Color.decode("#dcb159").getRGB();
-    public static int updatesPerSecond = 45;
+    public static int updatesPerSecond = 60;
     public static int updateInterval = (int) (1f / updatesPerSecond * 1000); // time in ms
 
     private final int width;
@@ -61,16 +61,22 @@ public class Grid {
 
     private void update() {
         // backward to not double apply gravity to a particle
-        for(int i = this.grid.size() - 1; i >= 0; i--) {
+        for(int i = this.grid.size() - this.width - 1; i >= 0; i--) {
             int x = i % width;
             int y = i / width;
 
-            if(y < height - 1) {
-                int below = i + width;
-                // If there are no pixels below, move it down.
-                if(isEmpty(below)) {
-                    swap(i, below);
-                }
+            // Get the indices of the pixels directly below
+            int below = i + width;
+            int belowL = below - 1;
+            int belowR = below + 1;
+
+            // If there are no pixels below, including diagonals, move it accordingly.
+            if(isEmpty(below)) {
+                swap(i, below);
+            } else if(isEmpty(belowL)) {
+                swap(i, belowL);
+            } else if(isEmpty(belowR)) {
+                swap(i, belowR);
             }
         }
 
@@ -126,6 +132,7 @@ public class Grid {
      * @return True if the space is empty, false otherwise.
      */
     public boolean isEmpty(int index) {
+        if(index >= grid.size()) return false;
         return this.grid.get(index) == 0;
     }
 
@@ -158,11 +165,11 @@ public class Grid {
         return height;
     }
 
-    public void setCursorIndex(int cursorIndex) {
-        this.cursorIndex = cursorIndex;
-    }
-
     public int getCursorIndex() {
         return this.cursorIndex;
+    }
+
+    public void setCursorIndex(int cursorIndex) {
+        this.cursorIndex = cursorIndex;
     }
 }
