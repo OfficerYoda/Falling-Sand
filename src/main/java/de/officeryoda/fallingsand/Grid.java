@@ -17,13 +17,13 @@ public class Grid {
     public static final int SAND_COLOR_RGB = SAND_COLOR.getRGB();
     public static final int CURSOR_RADIUS = 3;
 
-    public static int updatesPerSecond = 60;
+    public static int updatesPerSecond = 100;
     public static int updateInterval = (int) (1f / updatesPerSecond * 1000); // time in ms
 
     private final int width;
     private final int height;
-    private ArrayList<Integer> grid;
     private final int gridSize;
+    private ArrayList<Integer> grid;
     private GridDrawer gridDrawer;
     private int[] cursorIndices = new int[0];
 
@@ -66,21 +66,25 @@ public class Grid {
     private void update() {
         // backward to not double apply gravity to a particle
         for(int i = this.gridSize - this.width - 1; i >= 0; i--) {
+//            for(int i = 0; i < this.gridSize - this.width - 1; i++) {
+
             int x = i % width;
             int y = i / width;
 
             // Get the indices of the pixels directly below
+            int dir = Math.random() < 0.5 ? 1 : -1;
+
             int below = i + width;
-            int belowL = below - 1;
-            int belowR = below + 1;
+            int belowA = below - dir;
+            int belowB = below + dir;
 
             // If there are no pixels below, including diagonals, move it accordingly.
             if(isEmpty(below)) {
                 swap(i, below);
-            } else if(isEmpty(belowL)) {
-                swap(i, belowL);
-            } else if(isEmpty(belowR)) {
-                swap(i, belowR);
+            } else if(isEmpty(belowA)) {
+                swap(i, belowA);
+            } else if(isEmpty(belowB)) {
+                swap(i, belowB);
             }
         }
 

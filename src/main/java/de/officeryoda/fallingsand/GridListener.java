@@ -7,6 +7,7 @@ import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.util.ArrayList;
+import java.util.Arrays;
 
 public class GridListener extends MouseAdapter {
 
@@ -63,13 +64,16 @@ public class GridListener extends MouseAdapter {
         }
 
         int cursorIndex = x / cellSize + y / cellSize * grid.getWidth();
-        int[] cursorIndices = getIndicesInRadius(cursorIndex, Grid.CURSOR_RADIUS);
+        int[] cursorIndices = getIndicesInSquare(cursorIndex, Grid.CURSOR_RADIUS);
+        Arrays.stream(cursorIndices).forEach(System.out::println);
         grid.setCursorIndices(cursorIndices);
 
         if(!isLeftPressed) return;
+//        grid.set(cursorIndices[0], Grid.SAND_COLOR_RGB);
         for(int index : cursorIndices) {
-            if(Math.random() < 0.5)
+            if(Math.random() < 0.5) {
                 grid.set(index, varyColor(Grid.SAND_COLOR_RGB));
+            }
         }
     }
 
@@ -85,10 +89,33 @@ public class GridListener extends MouseAdapter {
             for(int extY = -radius; extY <= radius; extY++) {
                 int newX = centerX + extX;
                 int newY = centerY + extY;
-                if(sqrDistance(centerX, centerY, newX, newY) <= sqrRadius) {
+
+                int sqrDst = sqrDistance(centerX, centerY, newX, newY);
+                if(sqrDst <= sqrRadius) {
                     int index = newX + newY * width;
                     indices.add(index);
                 }
+            }
+        }
+
+        return indices.stream().mapToInt(Integer::intValue).toArray();
+    }
+
+    private int[] getIndicesInSquare(int centerIndex, int radius) {
+        int width = grid.getWidth();
+        int centerX = centerIndex % width;
+        int centerY = centerIndex / width;
+        int sqrRadius = radius * radius;
+
+        java.util.List<Integer> indices = new ArrayList<>();
+
+        for(int extX = -radius; extX <= radius; extX++) {
+            for(int extY = -radius; extY <= radius; extY++) {
+                int newX = centerX + extX;
+                int newY = centerY + extY;
+
+                int index = newX + newY * width;
+                indices.add(index);
             }
         }
 
