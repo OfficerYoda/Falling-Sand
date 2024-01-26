@@ -37,7 +37,7 @@ class GridPanel extends JPanel {
         this.grid = grid;
         this.cellSize = cellSize;
         this.borderGap = borderGap;
-        setBackground(Color.black);
+        setBackground(Color.decode("#010409"));
     }
 
     @Override
@@ -45,7 +45,7 @@ class GridPanel extends JPanel {
         super.paintComponent(g);
 
 //        Color randomColor = new Color((int) (Math.random() * 0x1000000));
-        g.setColor(Color.white);
+//        g.setColor(Color.white);
 
         final int maxX = borderGap + grid.getWidth() * cellSize;
         final int maxY = borderGap + grid.getHeight() * cellSize;
@@ -67,8 +67,8 @@ class GridPanel extends JPanel {
         for(int x = 0; x < grid.getWidth(); x++) {
             for(int y = 0; y < grid.getHeight(); y++) {
                 if(grid.isEmpty(x, y)) continue;
-                g.setColor(Color.white);
-                g.fillRect(borderGap + x * cellSize , borderGap + y * cellSize, cellSize, cellSize);
+                g.setColor(new Color(grid.get(x, y)));
+                g.fillRect(borderGap + x * cellSize, borderGap + y * cellSize, cellSize, cellSize);
             }
         }
     }

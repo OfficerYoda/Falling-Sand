@@ -1,6 +1,7 @@
 package de.officeryoda.fallingsand;
 
 import javax.swing.*;
+import java.awt.*;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.concurrent.CountDownLatch;
@@ -9,6 +10,8 @@ import java.util.concurrent.CountDownLatch;
  * Represents a grid for a falling sand simulation.
  */
 public class Grid {
+
+    public static int SAND_COLOR = Color.decode("#dcb159").getRGB();
 
     private final int width;
     private final int height;
@@ -56,7 +59,10 @@ public class Grid {
      * @param color The color to set for the particle.
      */
     public void set(int x, int y, int color) {
-        this.grid.set(x + y * this.width, color);
+        int index = x + y * this.width;
+        if(index >= grid.size()) return;
+
+        this.grid.set(index, color);
         this.gridDrawer.repaintGrid();
     }
 
