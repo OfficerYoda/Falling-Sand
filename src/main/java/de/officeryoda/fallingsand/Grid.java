@@ -14,15 +14,18 @@ import java.util.concurrent.CountDownLatch;
 public class Grid {
 
     public static final Color SAND_COLOR = Color.decode("#dcb159");
-    public static final int SAND_COLOR_RGB = Color.decode("#dcb159").getRGB();
+    public static final int SAND_COLOR_RGB = SAND_COLOR.getRGB();
+    public static final int CURSOR_RADIUS = 3;
+
     public static int updatesPerSecond = 60;
     public static int updateInterval = (int) (1f / updatesPerSecond * 1000); // time in ms
 
     private final int width;
     private final int height;
     private ArrayList<Integer> grid;
+    private final int gridSize;
     private GridDrawer gridDrawer;
-    private int cursorIndex = -1;
+    private int[] cursorIndices = new int[0];
 
     /**
      * Constructs a Grid with the specified width and height.
@@ -34,6 +37,7 @@ public class Grid {
         this.width = width - width % cellSize; // mod to get rid of any extra
         this.height = height - height % cellSize; // mod to get rid of any extra
         this.grid = new ArrayList<>(Collections.nCopies(width * height, 0));
+        this.gridSize = grid.size();
 
         // Use CountDownLatch for synchronization
         CountDownLatch latch = new CountDownLatch(1);
@@ -61,7 +65,7 @@ public class Grid {
 
     private void update() {
         // backward to not double apply gravity to a particle
-        for(int i = this.grid.size() - this.width - 1; i >= 0; i--) {
+        for(int i = this.gridSize - this.width - 1; i >= 0; i--) {
             int x = i % width;
             int y = i / width;
 
@@ -98,7 +102,17 @@ public class Grid {
      * @param color The color to set for the particle.
      */
     public void set(int x, int y, int color) {
-        this.grid.set(x + y * this.width, color);
+        this.set(x + y * this.width, color);
+    }
+
+    /**
+     * Sets the color of a specific particle at the given index.
+     *
+     * @param index The index.
+     * @param color The color to set for the particle.
+     */
+    public void set(int index, int color) {
+        this.grid.set(index, color);
     }
 
     /**
@@ -132,7 +146,7 @@ public class Grid {
      * @return True if the space is empty, false otherwise.
      */
     public boolean isEmpty(int index) {
-        if(index >= grid.size()) return false;
+        if(index >= gridSize) return false;
         return this.grid.get(index) == 0;
     }
 
@@ -165,11 +179,11 @@ public class Grid {
         return height;
     }
 
-    public int getCursorIndex() {
-        return this.cursorIndex;
+    public int[] getCursorIndices() {
+        return this.cursorIndices;
     }
 
-    public void setCursorIndex(int cursorIndex) {
-        this.cursorIndex = cursorIndex;
+    public void setCursorIndices(int[] cursorIndices) {
+        this.cursorIndices = cursorIndices;
     }
 }

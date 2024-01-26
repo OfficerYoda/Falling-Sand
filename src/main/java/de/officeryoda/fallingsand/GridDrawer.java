@@ -59,7 +59,7 @@ class GridPanel extends JPanel {
     protected void paintComponent(Graphics g) {
         super.paintComponent(g);
 
-        paintGrid(g);
+//        paintGrid(g);
         paintParticles(g);
         paintCursor(g);
     }
@@ -96,14 +96,14 @@ class GridPanel extends JPanel {
     }
 
     private void paintCursor(Graphics g) {
-        int cursorIndex = grid.getCursorIndex();
-//        System.out.println("cursor: " + cursorIndex);
-        if(cursorIndex == -1) return;
+        int[] cursorIndices = grid.getCursorIndices();
 
-        int x = cursorIndex % grid.getWidth();
-        int y = cursorIndex / grid.getWidth();
+        for(int index : cursorIndices) {
+            int x = index % grid.getWidth();
+            int y = index / grid.getWidth();
 
-        g.setColor(Grid.SAND_COLOR);
-        g.fillRect(x * cellSize, y * cellSize, cellSize, cellSize);
+            g.setColor(new Color(GridListener.varyColor(Grid.SAND_COLOR_RGB)));
+            g.fillRect(x * cellSize, y * cellSize, cellSize, cellSize);
+        }
     }
 }

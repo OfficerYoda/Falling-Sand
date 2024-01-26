@@ -6,6 +6,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.util.ArrayList;
 
 public class GridListener extends MouseAdapter {
 
@@ -57,14 +58,47 @@ public class GridListener extends MouseAdapter {
 
         if(x < 0 || x > grid.getWidth() * cellSize ||
                 y < 0 || y > grid.getHeight() * cellSize) {
-            grid.setCursorIndex(-1);
+            grid.setCursorIndices(new int[0]);
             return;
         }
 
-        grid.setCursorIndex(x / cellSize + y / cellSize * grid.getWidth());
+        int cursorIndex = x / cellSize + y / cellSize * grid.getWidth();
+        int[] cursorIndices = getIndicesInRadius(cursorIndex, Grid.CURSOR_RADIUS);
+        grid.setCursorIndices(cursorIndices);
 
         if(!isLeftPressed) return;
-        grid.set(x / cellSize, y / cellSize, varyColor(Grid.SAND_COLOR_RGB));
+        for(int index : cursorIndices) {
+            if(Math.random() < 0.5)
+                grid.set(index, varyColor(Grid.SAND_COLOR_RGB));
+        }
+    }
+
+    private int[] getIndicesInRadius(int centerIndex, int radius) {
+        int width = grid.getWidth();
+        int centerX = centerIndex % width;
+        int centerY = centerIndex / width;
+        int sqrRadius = radius * radius;
+
+        java.util.List<Integer> indices = new ArrayList<>();
+
+        for(int extX = -radius; extX <= radius; extX++) {
+            for(int extY = -radius; extY <= radius; extY++) {
+                int newX = centerX + extX;
+                int newY = centerY + extY;
+                if(sqrDistance(centerX, centerY, newX, newY) <= sqrRadius) {
+                    int index = newX + newY * width;
+                    indices.add(index);
+                }
+            }
+        }
+
+        return indices.stream().mapToInt(Integer::intValue).toArray();
+    }
+
+    private int sqrDistance(int x1, int y1, int x2, int y2) {
+        int deltaX = x2 - x1;
+        int deltaY = y2 - y1;
+        return deltaX * deltaX + deltaY * deltaY;
     }
 
     @Override
@@ -82,6 +116,6 @@ public class GridListener extends MouseAdapter {
     @Override
     public void mouseExited(MouseEvent e) {
         super.mouseExited(e);
-        grid.setCursorIndex(-1);
+        grid.setCursorIndices(new int[0]);
     }
 }
