@@ -4,6 +4,8 @@ import javax.swing.*;
 import java.awt.*;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Timer;
+import java.util.TimerTask;
 import java.util.concurrent.CountDownLatch;
 
 /**
@@ -11,7 +13,9 @@ import java.util.concurrent.CountDownLatch;
  */
 public class Grid {
 
-    public static int SAND_COLOR = Color.decode("#dcb159").getRGB();
+    public static final int SAND_COLOR = Color.decode("#dcb159").getRGB();
+    public static int updatesPerSecond = 45;
+    public static int updateInterval= (int) (1f / updatesPerSecond * 1000); // time in ms
 
     private final int width;
     private final int height;
@@ -29,11 +33,14 @@ public class Grid {
         this.height = height;
         this.grid = new ArrayList<>(Collections.nCopies(width * height, 0));
 
+        final int cellSize = 10;
+        final int borderGap = 50;
+
         // Use CountDownLatch for synchronization
         CountDownLatch latch = new CountDownLatch(1);
 
         SwingUtilities.invokeLater(() -> {
-            gridDrawer = new GridDrawer(this, 10, 50);
+            gridDrawer = new GridDrawer(this, cellSize, 50);
             latch.countDown(); // Signal that initialization is complete
         });
 
@@ -42,6 +49,33 @@ public class Grid {
         } catch(InterruptedException e) {
             e.printStackTrace();
         }
+
+        // start the update loop
+        Timer updateTimer = new Timer(true);
+        updateTimer.scheduleAtFixedRate(new TimerTask() {
+            @Override
+            public void run() {
+                update();
+            }
+        }, 0, updateInterval);
+    }
+
+    private void update() {
+        // backward to not double apply gravity to a particle
+        for (int i = this.grid.size() - 1; i > 0; i--) {
+            int x = i % width;
+            int y = i / width;
+
+            if(y < height - 1) {
+                int below = i + width;
+                // If there are no pixels below, move it down.
+                if(isEmpty(below)) {
+                    swap(i, below);
+                }
+            }
+        }
+
+        gridDrawer.repaintGrid();
     }
 
     /**
@@ -59,11 +93,7 @@ public class Grid {
      * @param color The color to set for the particle.
      */
     public void set(int x, int y, int color) {
-        int index = x + y * this.width;
-        if(index >= grid.size()) return;
-
-        this.grid.set(index, color);
-        this.gridDrawer.repaintGrid();
+        this.grid.set(x + y * this.width, color);
     }
 
     /**

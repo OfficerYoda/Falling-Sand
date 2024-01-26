@@ -16,7 +16,7 @@ public class GridDrawer extends JFrame {
         gridPanel = new GridPanel(grid, cellSize, borderGap);
         add(gridPanel);
 
-        addMouseMotionListener(new GridListener(grid, cellSize, borderGap));
+        addMouseListener(new GridListener(grid, cellSize, borderGap, this));
 
         setVisible(true);
     }
