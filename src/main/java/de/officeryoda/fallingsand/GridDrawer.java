@@ -3,14 +3,18 @@ package de.officeryoda.fallingsand;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.image.BufferedImage;
+import java.util.Arrays;
+import java.util.List;
 
 public class GridDrawer extends JFrame {
 
     public final static int TITLE_BAR_HEIGHT = 40;
 
     private final GridPanel gridPanel;
+    private final int cellSize;
 
     public GridDrawer(Grid grid, int cellSize) {
+        this.cellSize = cellSize;
 
         setTitle("Falling Sand");
         setSize(grid.getWidth() * cellSize + 16, // idk why but it was always 16px to narrow
@@ -47,7 +51,7 @@ public class GridDrawer extends JFrame {
 
     public void repaintGrid(Rectangle rect) {
         gridPanel.setBoundsRect(rect);
-        gridPanel.repaint(rect.x, rect.y, rect.width, rect.height);
+        gridPanel.repaint(rect.x * cellSize, rect.y * cellSize, rect.width * cellSize, rect.height * cellSize);
     }
 }
 
@@ -75,7 +79,7 @@ class GridPanel extends JPanel {
     protected void paintComponent(Graphics g) {
         super.paintComponent(g);
 
-//        g.setColor(Colors.BACKGROUND_COLOR);
+//        g.setColor(Colors.varyColor(Colors.BACKGROUND_COLOR));
 //        g.fillRect(0, 0, getWidth(), getHeight());
         paintParticles(g);
         paintCursor(g);
@@ -118,14 +122,12 @@ class GridPanel extends JPanel {
         int maxX = boundsRect.x + boundsRect.width;
         int maxY = boundsRect.y + boundsRect.height;
 
-//        g.setColor(Colors.varyColor(Colors.SAND_COLOR));
-//        g.fillRect(boundsRect.x, boundsRect.y, maxX, maxY);
-        for(int x = 0; x < gridWidth; x++) {
-            for(int y = 0; y < gridHeight; y++) {
+        for(int x = boundsRect.x; x < maxX; x++) {
+            for(int y = boundsRect.y; y < maxY; y++) {
                 int index = x + y * gridWidth;
 
-                g.setColor(grid.get(index).getColor());
-                g.fillRect(x * cellSize, y * cellSize, cellSize, cellSize);
+                Color color = grid.get(index).getColor();
+                paintPixel(x, y, color, g);
             }
         }
     }
@@ -136,18 +138,26 @@ class GridPanel extends JPanel {
     }
 
     private void paintCursor(Graphics g) {
-        int[] cursorIndices = grid.getCursorIndices();
+        List<Integer> cursorIndices = Arrays.stream(Arrays.stream(grid.getCursorIndices()).boxed().toArray(Integer[]::new)).toList();
         Color[] cursorColors = grid.getCursorColors();
 
-        for(int i = 0; i < cursorIndices.length; i++) {
-            int index = cursorIndices[i];
+        int maxX = boundsRect.x + boundsRect.width;
+        int maxY = boundsRect.y + boundsRect.height;
 
-            int x = index % gridWidth;
-            int y = index / gridWidth;
+        for(int x = boundsRect.x; x < maxX; x++) {
+            for(int y = boundsRect.y; y < maxY; y++) {
+                int index = x + y * gridWidth;
+                int cursorIdx = cursorIndices.indexOf(index);
 
-            g.setColor(grid.isEmpty(index) ? cursorColors[i] : grid.get(index).getColor());
-            g.fillRect(x * cellSize, y * cellSize, cellSize, cellSize);
+                Color color = cursorIdx == -1 ? grid.get(index).getColor() : cursorColors[cursorIdx];
+                paintPixel(x, y, color, g);
+            }
         }
+    }
+
+    private void paintPixel(int x, int y, Color color, Graphics g) {
+        g.setColor(color);
+        g.fillRect(x * cellSize, y * cellSize, cellSize, cellSize);
     }
 
     private void paintFps(Graphics g) {

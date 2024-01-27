@@ -101,7 +101,7 @@ public class Grid {
 
     private void updateParticles() {
         // backward to not double apply gravity to a particle
-        for(int row = height - 2; row >= 0; row--) {
+        for(int row = height - 1; row >= 0; row--) {
             int rowOffset = row * this.width;
             boolean leftToRight = Math.random() > 0.5;
             for(int col = 0; col < this.width; col++) {
@@ -136,7 +136,6 @@ public class Grid {
         int column = i % this.width;
 
         // If there are no pixels below, including diagonals, move it accordingly.
-        System.out.println("i: " + i);
         if(isEmpty(below)) {
             swap(i, below);
             return below;
@@ -185,13 +184,13 @@ public class Grid {
         IntSummaryStatistics statsX = modifiedIndices.stream().mapToInt(i -> i % width).summaryStatistics();
         IntSummaryStatistics statsY = modifiedIndices.stream().mapToInt(i -> i / width).summaryStatistics();
 
-        int minX = statsX.getMin() * cellSize;
-        int maxX = statsX.getMax() * cellSize;
-        int minY = statsY.getMin() * cellSize;
-        int maxY = statsY.getMax() * cellSize;
+        int minX = statsX.getMin();
+        int maxX = statsX.getMax();
+        int minY = statsY.getMin();
+        int maxY = statsY.getMax();
 
         // Create and return the bounding box
-        return new Rectangle(minX, minY, maxX - minX + cellSize, maxY - minY + cellSize);
+        return new Rectangle(minX, minY, maxX - minX + 1, maxY - minY + 1); // + cellSize/1 to get rid of stray pixels
     }
 
     public Rectangle getBoundingRectangle(Rectangle rect1, Rectangle rect2) {
