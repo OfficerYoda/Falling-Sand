@@ -21,7 +21,9 @@ public class GridDrawer extends JFrame {
         gridPanel = new GridPanel(grid, cellSize);
         add(gridPanel);
 
-        addMouseListener(new GridListener(grid, cellSize, this));
+        GridListener gridListener = new GridListener(grid, cellSize, this);
+        addMouseListener(gridListener);
+        addMouseWheelListener(gridListener);
 
         setInvisibleCursor();
 
@@ -59,9 +61,9 @@ class GridPanel extends JPanel {
     protected void paintComponent(Graphics g) {
         super.paintComponent(g);
 
+        paintCursor(g);
 //        paintGrid(g);
         paintParticles(g);
-        paintCursor(g);
     }
 
     private void paintGrid(Graphics g) {
@@ -97,12 +99,14 @@ class GridPanel extends JPanel {
 
     private void paintCursor(Graphics g) {
         int[] cursorIndices = grid.getCursorIndices();
+        Color[] cursorColors = grid.getCursorColors();
 
-        for(int index : cursorIndices) {
+        for(int i = 0; i < cursorIndices.length; i++) {
+            int index = cursorIndices[i];
             int x = index % grid.getWidth();
             int y = index / grid.getWidth();
 
-            g.setColor(new Color(GridListener.varyColor(Grid.SAND_COLOR_RGB)));
+            g.setColor(cursorColors[i]);
             g.fillRect(x * cellSize, y * cellSize, cellSize, cellSize);
         }
     }

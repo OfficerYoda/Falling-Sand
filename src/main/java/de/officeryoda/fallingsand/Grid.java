@@ -1,6 +1,7 @@
 package de.officeryoda.fallingsand;
 
 import javax.swing.*;
+import javax.swing.plaf.ColorUIResource;
 import java.awt.*;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -15,7 +16,7 @@ public class Grid {
 
     public static final Color SAND_COLOR = Color.decode("#dcb159");
     public static final int SAND_COLOR_RGB = SAND_COLOR.getRGB();
-    public static final int CURSOR_RADIUS = 3;
+    public static int CURSOR_RADIUS = 3;
 
     public static int updatesPerSecond = 100;
     public static int updateInterval = (int) (1f / updatesPerSecond * 1000); // time in ms
@@ -25,7 +26,9 @@ public class Grid {
     private final int gridSize;
     private ArrayList<Integer> grid;
     private GridDrawer gridDrawer;
+
     private int[] cursorIndices = new int[0];
+    private Color[] cursorColors = new Color[0];
 
     /**
      * Constructs a Grid with the specified width and height.
@@ -116,6 +119,7 @@ public class Grid {
      * @param color The color to set for the particle.
      */
     public void set(int index, int color) {
+        if(index >= gridSize) return;
         this.grid.set(index, color);
     }
 
@@ -189,5 +193,20 @@ public class Grid {
 
     public void setCursorIndices(int[] cursorIndices) {
         this.cursorIndices = cursorIndices;
+
+        if(cursorIndices.length <= cursorColors.length) return;
+
+        cursorColors = new Color[cursorIndices.length];
+        for(int i = 0; i < cursorIndices.length; i++) {
+            cursorColors[i] = new Color(GridListener.varyColor(SAND_COLOR_RGB));
+        }
+    }
+
+    public Color[] getCursorColors() {
+        return this.cursorColors;
+    }
+
+    public static void setCursorRadius(int radius) {
+        Grid.CURSOR_RADIUS = Math.max(1, radius);
     }
 }

@@ -2,14 +2,10 @@ package de.officeryoda.fallingsand;
 
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
+import java.awt.event.*;
 import java.util.ArrayList;
-import java.util.Arrays;
 
-public class GridListener extends MouseAdapter {
+public class GridListener extends MouseAdapter implements MouseWheelListener {
 
     private final Grid grid;
     private final int cellSize;
@@ -64,13 +60,13 @@ public class GridListener extends MouseAdapter {
         }
 
         int cursorIndex = x / cellSize + y / cellSize * grid.getWidth();
-        int[] cursorIndices = getIndicesInSquare(cursorIndex, Grid.CURSOR_RADIUS);
-        Arrays.stream(cursorIndices).forEach(System.out::println);
+        int[] cursorIndices = getIndicesInRadius(cursorIndex, Grid.CURSOR_RADIUS);
         grid.setCursorIndices(cursorIndices);
 
         if(!isLeftPressed) return;
 //        grid.set(cursorIndices[0], Grid.SAND_COLOR_RGB);
         for(int index : cursorIndices) {
+            if(index < 0) continue;
             if(Math.random() < 0.5) {
                 grid.set(index, varyColor(Grid.SAND_COLOR_RGB));
             }
@@ -130,19 +126,30 @@ public class GridListener extends MouseAdapter {
 
     @Override
     public void mousePressed(MouseEvent e) {
-        isLeftPressed = true;
-//        timer.start();
+        if(e.getButton() == MouseEvent.BUTTON1) {
+            isLeftPressed = true;
+        } else if(e.getButton() == MouseEvent.BUTTON3) {
+            grid.clear();
+        }
     }
 
     @Override
     public void mouseReleased(MouseEvent e) {
-        isLeftPressed = false;
-//        timer.stop();
+        if(e.getButton() == MouseEvent.BUTTON1) {
+            isLeftPressed = false;
+        }
     }
 
     @Override
     public void mouseExited(MouseEvent e) {
         super.mouseExited(e);
         grid.setCursorIndices(new int[0]);
+    }
+
+    @Override
+    public void mouseWheelMoved(MouseWheelEvent e) {
+        super.mouseWheelMoved(e);
+        int wheelRotation = e.getWheelRotation(); // -1 = up; 1 = down
+        Grid.setCursorRadius(Grid.CURSOR_RADIUS - wheelRotation);
     }
 }
