@@ -64,6 +64,7 @@ class GridPanel extends JPanel {
         paintCursor(g);
 //        paintGrid(g);
         paintParticles(g);
+        paintFps(g);
     }
 
     private void paintGrid(Graphics g) {
@@ -109,5 +110,19 @@ class GridPanel extends JPanel {
             g.setColor(cursorColors[i]);
             g.fillRect(x * cellSize, y * cellSize, cellSize, cellSize);
         }
+    }
+
+    private void paintFps(Graphics g) {
+        int fps = (int) (1000 / (System.currentTimeMillis() - grid.getLastUpdate()));
+
+        int screenWidth = getWidth();
+        int screenHeight = getHeight();
+
+        int fontSize = screenHeight / 30; // Adjust the divisor for the desired scaling
+
+        Font font = new Font("Spline Sans", Font.PLAIN, fontSize);
+        g.setFont(font);
+        g.setColor(Color.WHITE);
+        g.drawString("FPS: " + fps, 5, GridDrawer.TITLE_BAR_HEIGHT);
     }
 }

@@ -22,26 +22,9 @@ public class GridListener extends MouseAdapter implements MouseWheelListener {
         this.isLeftPressed = false;
 
         // Call your method here
-        Timer timer = new Timer(Grid.updateInterval, new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                // Call your method here
-                spawn();
-            }
-        });
+        Timer timer = new Timer(Grid.updateInterval, e -> spawn());
 
         timer.start();
-    }
-
-    public static int varyColor(int color) {
-        float[] hsb = new float[3];
-        Color.RGBtoHSB((color >> 16) & 0xFF, (color >> 8) & 0xFF, color & 0xFF, hsb);
-
-        float hue = hsb[0];
-        float saturation = (float) (hsb[1] + Math.random() * -0.2);
-        float lightness = (float) (hsb[2] + (Math.random() * 0.2 - 0.1));
-
-        return Color.HSBtoRGB(hue, saturation, lightness);
     }
 
     private void spawn() {
