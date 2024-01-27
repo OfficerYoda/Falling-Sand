@@ -99,48 +99,14 @@ public class Grid {
         lastUpdate = System.currentTimeMillis();
     }
 
-    private void repaintGrid() {
-//        Rectangle rect;
-//        if(cleared) {
-//            gridDrawer.repaintGrid();
-//            return;
-//        } else if(modifiedIndices.isEmpty()) {
-//            // draw cursor
-//            rect = calculateBoundingBox(Arrays.asList(Arrays.stream(cursorIndices).boxed().toArray(Integer[]::new)));
-//        } else {
-//            // add cursorIndices to also draw them
-//            List<Integer> intList = Arrays.asList(Arrays.stream(cursorIndices).boxed().toArray(Integer[]::new));
-//            modifiedIndices.addAll(intList);
-//
-//            rect = calculateBoundingBox(modifiedIndices);
-//        }
-//
-//        DRAW_FINISHED_LATCH = new CountDownLatch(1);
-//        // to prevent leaving stray pixels
-//        Rectangle totalRect = getBoundingRectangle(rect, lastUpdateRect);
-//        gridDrawer.repaintGrid(totalRect);
-//        lastUpdateRect = rect;
-//
-//        try {
-//            DRAW_FINISHED_LATCH.await();
-//        } catch(InterruptedException e) {
-//            throw new RuntimeException(e);
-//        }
-
-        gridDrawer.repaintGrid();
-
-        // fps display
-//        gridDrawer.repaintGrid(new Rectangle(0, 0, 200, 200));
-    }
-
     private void updateParticles() {
         // backward to not double apply gravity to a particle
-        for(int row = height - 1; row >= 0; row--) {
+        for(int row = height - 2; row >= 0; row--) {
             int rowOffset = row * this.width;
             boolean leftToRight = Math.random() > 0.5;
-            for(int i = 0; i < this.width; i++) {
+            for(int col = 0; col < this.width; col++) {
                 // Go from right to left or left to right depending on our random value
-                int columnOffset = leftToRight ? i : -i - 1 + this.width;
+                int columnOffset = leftToRight ? col : -col - 1 + this.width;
                 int index = rowOffset + columnOffset;
 
                 Particle particle = grid[index];
@@ -148,7 +114,8 @@ public class Grid {
                 for(int j = 0; j < particle.getUpdateCount(); j++) {
                     int newIdx = updatePixel(index);
 
-                    if(newIdx == index) {
+                    // stop the particle if the newIndex bottom or bottomR exceeds the boundary (gridSize - width - 1)
+                    if(newIdx == index || newIdx > gridSize - width) {
                         particle.resetVelocity();
                         break;
                     } else {
@@ -156,6 +123,60 @@ public class Grid {
                     }
                 }
             }
+        }
+    }
+
+    private int updatePixel(int i) {
+        if(isEmpty(i)) return i;
+
+        // Get the indices of the pixels directly below
+        int below = i + width;
+        int belowA = below - 1;
+        int belowB = below + 1;
+        int column = i % this.width;
+
+        // If there are no pixels below, including diagonals, move it accordingly.
+        System.out.println("i: " + i);
+        if(isEmpty(below)) {
+            swap(i, below);
+            return below;
+        } else if(this.isEmpty(belowA) && belowA % this.width < column) { // Check to make sure belowLeft didn't wrap to the next line
+            this.swap(i, belowA);
+            return belowA;
+        } else if(this.isEmpty(belowB) && belowB % this.width > column) { // Check to make sure belowRight didn't wrap to the next line
+            this.swap(i, belowB);
+            return belowB;
+        }
+
+        return i;
+    }
+
+    private void repaintGrid() {
+        Rectangle rect;
+        if(cleared) {
+            gridDrawer.repaintGrid();
+            return;
+        } else if(modifiedIndices.isEmpty()) {
+            // draw cursor
+            rect = calculateBoundingBox(Arrays.asList(Arrays.stream(cursorIndices).boxed().toArray(Integer[]::new)));
+        } else {
+            // add cursorIndices to also draw them
+            List<Integer> intList = Arrays.asList(Arrays.stream(cursorIndices).boxed().toArray(Integer[]::new));
+            modifiedIndices.addAll(intList);
+
+            rect = calculateBoundingBox(modifiedIndices);
+        }
+
+        DRAW_FINISHED_LATCH = new CountDownLatch(1);
+        // to prevent leaving stray pixels
+        Rectangle totalRect = getBoundingRectangle(rect, lastUpdateRect);
+        gridDrawer.repaintGrid(totalRect);
+        lastUpdateRect = rect;
+
+        try {
+            DRAW_FINISHED_LATCH.await();
+        } catch(InterruptedException e) {
+            throw new RuntimeException(e);
         }
     }
 
@@ -186,30 +207,6 @@ public class Grid {
         return new Rectangle(x, y, width, height);
     }
 
-    private int updatePixel(int i) {
-        if(isEmpty(i)) return i;
-
-        // Get the indices of the pixels directly below
-        int below = i + width;
-        int belowA = below - 1;
-        int belowB = below + 1;
-        int column = i % this.width;
-
-        // If there are no pixels below, including diagonals, move it accordingly.
-        if(isEmpty(below)) {
-            swap(i, below);
-            return below;
-        } else if(this.isEmpty(belowA) && belowA % this.width < column) { // Check to make sure belowLeft didn't wrap to the next line
-            this.swap(i, belowA);
-            return belowA;
-        } else if(this.isEmpty(belowB) && belowB % this.width > column) { // Check to make sure belowRight didn't wrap to the next line
-            this.swap(i, belowB);
-            return belowB;
-        }
-
-        return i;
-    }
-
     /**
      * Clears the grid, resetting all values to the default.
      */
@@ -226,13 +223,14 @@ public class Grid {
      * @param particle The Particle.
      */
     public void set(int index, Particle particle) {
-        if(index >= gridSize) return;
+//        if(index >= gridSize) return;
         this.grid[index] = particle;
 
         this.modifiedIndices.add(index);
     }
 
     public Particle get(int index) {
+        if(index >= gridSize) return ParticleFactory.createParticle(0);
         return this.grid[index];
     }
 

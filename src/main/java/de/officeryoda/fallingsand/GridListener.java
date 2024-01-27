@@ -42,7 +42,7 @@ public class GridListener extends MouseAdapter implements MouseWheelListener {
         for(int index : cursorIndices) {
             if(index < 0) continue;
             if(Math.random() < 0.5) {
-                grid.set(index, createSelectedParticle());
+                grid.set(index, ParticleFactory.createParticle());
             }
         }
     }
@@ -61,7 +61,6 @@ public class GridListener extends MouseAdapter implements MouseWheelListener {
         if(x < 0 || x > grid.getWidth() * cellSize ||
                 y < 0 || y > grid.getHeight() * cellSize) {
             grid.setCursorIndices(new int[0]);
-            System.out.println("invalid cursor pos");
             return new int[0];
         }
 
@@ -92,7 +91,12 @@ public class GridListener extends MouseAdapter implements MouseWheelListener {
             }
         }
 
-        return indices.stream().mapToInt(Integer::intValue).toArray();
+        int gridSize = grid.getWidth() * grid.getHeight();
+
+        return indices.stream()
+                .mapToInt(Integer::intValue)
+                .filter(value -> value >= 0 && value < gridSize)
+                .toArray();
     }
 
     private int[] getIndicesInSquare(int centerIndex, int radius) {
@@ -124,12 +128,6 @@ public class GridListener extends MouseAdapter implements MouseWheelListener {
     private void changeCursorSize(MouseWheelEvent e) {
         int wheelRotation = e.getWheelRotation(); // -1 = up; 1 = down
         Grid.setCursorRadius(Grid.CURSOR_RADIUS - wheelRotation);
-    }
-
-    public Particle createSelectedParticle() {
-        Particle particle = ParticleFactory.createParticle();
-        grid.updateCursorColors();
-        return particle;
     }
 
     @Override

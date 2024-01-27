@@ -3,8 +3,6 @@ package de.officeryoda.fallingsand;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.image.BufferedImage;
-import java.util.HashSet;
-import java.util.Set;
 
 public class GridDrawer extends JFrame {
 
@@ -48,6 +46,7 @@ public class GridDrawer extends JFrame {
     }
 
     public void repaintGrid(Rectangle rect) {
+        gridPanel.setBoundsRect(rect);
         gridPanel.repaint(rect.x, rect.y, rect.width, rect.height);
     }
 }
@@ -59,11 +58,15 @@ class GridPanel extends JPanel {
     private final int gridWidth;
     private final int gridHeight;
 
+    private Rectangle boundsRect;
+
     public GridPanel(Grid grid, int cellSize) {
         this.grid = grid;
         this.cellSize = cellSize;
         this.gridWidth = grid.getWidth();
         this.gridHeight = grid.getHeight();
+
+        this.boundsRect = new Rectangle(0, 0, getWidth(), getHeight());
 
         setBackground(Colors.BACKGROUND_COLOR);
     }
@@ -72,11 +75,11 @@ class GridPanel extends JPanel {
     protected void paintComponent(Graphics g) {
         super.paintComponent(g);
 
-        g.setColor(Colors.BACKGROUND_COLOR);
-        g.fillRect(0, 0, getWidth(), getHeight());
+//        g.setColor(Colors.BACKGROUND_COLOR);
+//        g.fillRect(0, 0, getWidth(), getHeight());
+        paintParticles(g);
         paintCursor(g);
 //        paintGrid(g);
-        paintParticles(g);
 //        paintFps(g);
 
         Grid.DRAW_FINISHED_LATCH.countDown();
@@ -104,37 +107,32 @@ class GridPanel extends JPanel {
     }
 
     private void paintParticles(Graphics g) {
-        Set<Integer> modifiedIndices = new HashSet<>(grid.getModifiedIndices());
-
         if(grid.isCleared()) {
             clearPixels(g);
-        } else if(!modifiedIndices.isEmpty()) {
-            paintModifiedPixels(g, modifiedIndices);
+        } else if(!grid.getModifiedIndices().isEmpty()) {
+            paintPixels(g);
         }
     }
 
+    private void paintPixels(Graphics g) {
+        int maxX = boundsRect.x + boundsRect.width;
+        int maxY = boundsRect.y + boundsRect.height;
 
-    private void paintModifiedPixels(Graphics g, Set<Integer> modifiedIndices) {
-        int gridSize = gridWidth * gridHeight;
-        modifiedIndices.forEach(index -> {
-            if(0 <= index && index < gridSize) {
-                int x = index % gridWidth;
-                int y = index / gridWidth;
+//        g.setColor(Colors.varyColor(Colors.SAND_COLOR));
+//        g.fillRect(boundsRect.x, boundsRect.y, maxX, maxY);
+        for(int x = 0; x < gridWidth; x++) {
+            for(int y = 0; y < gridHeight; y++) {
+                int index = x + y * gridWidth;
 
                 g.setColor(grid.get(index).getColor());
                 g.fillRect(x * cellSize, y * cellSize, cellSize, cellSize);
             }
-        });
+        }
     }
 
     private void clearPixels(Graphics g) {
-        for(int x = 0; x < gridWidth; x++) {
-            for(int y = 0; y < gridWidth; y++) {
-                if(grid.isEmpty(x + y * gridWidth)) continue;
-                g.setColor(grid.get(x + y * gridWidth).getColor());
-                g.fillRect(x * cellSize, y * cellSize, cellSize, cellSize);
-            }
-        }
+        g.setColor(Colors.BACKGROUND_COLOR);
+        g.fillRect(0, 0, getWidth(), getHeight());
     }
 
     private void paintCursor(Graphics g) {
@@ -143,10 +141,11 @@ class GridPanel extends JPanel {
 
         for(int i = 0; i < cursorIndices.length; i++) {
             int index = cursorIndices[i];
+
             int x = index % gridWidth;
             int y = index / gridWidth;
-//            System.out.println("paint Cursor");
-            g.setColor(cursorColors[i]);
+
+            g.setColor(grid.isEmpty(index) ? cursorColors[i] : grid.get(index).getColor());
             g.fillRect(x * cellSize, y * cellSize, cellSize, cellSize);
         }
     }
@@ -168,5 +167,9 @@ class GridPanel extends JPanel {
         g.setFont(font);
         g.setColor(Color.WHITE);
         g.drawString("FPS: " + fps, 5, GridDrawer.TITLE_BAR_HEIGHT);
+    }
+
+    void setBoundsRect(Rectangle boundsRect) {
+        this.boundsRect = boundsRect;
     }
 }
