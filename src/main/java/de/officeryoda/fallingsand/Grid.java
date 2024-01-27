@@ -6,6 +6,7 @@ import de.officeryoda.fallingsand.particle.ParticleFactory;
 
 import javax.swing.*;
 import java.awt.*;
+import java.util.List;
 import java.util.Timer;
 import java.util.*;
 import java.util.concurrent.CountDownLatch;
@@ -15,41 +16,48 @@ import java.util.concurrent.CountDownLatch;
  */
 public class Grid {
 
-    public static int CURSOR_RADIUS = 3;
+    public static CountDownLatch DRAW_FINISHED_LATCH = new CountDownLatch(1);
 
-    public static int updatesPerSecond = 120;
-    public static int updateInterval = (int) (1f / updatesPerSecond * 1000); // time in ms
+    public static int CURSOR_RADIUS = 8;
+
+    public static int UPDATES_PER_SECOND = 50;
+    public static int UPDATE_INTERVAL = (int) (1f / UPDATES_PER_SECOND * 1000); // time in ms
 
     private final int width;
     private final int height;
     private final int gridSize;
+    private final int cellSize;
     private final Particle[] grid;
 
     private final Set<Integer> modifiedIndices;
     private boolean cleared; // if we cleared all pixels last update
-
+    private Rectangle lastUpdateRect;
     private GridDrawer gridDrawer;
-
+    private GridListener gridListener;
     private int[] cursorIndices = new int[0];
     private Color[] cursorColors = new Color[0];
-
     private long lastUpdate = System.currentTimeMillis();
 
     /**
      * Constructs a Grid with the specified width and height.
      *
-     * @param width  The width of the grid.
-     * @param height The height of the grid.
+     * @param windowWidth  The width of the window displaying grid.
+     * @param windowHeight The height of the window displaying  grid.
      */
-    public Grid(int width, int height, int cellSize) {
-        this.width = width;
-        this.height = height;
+    public Grid(int windowWidth, int windowHeight, int cellSize) {
+        windowWidth -= windowWidth % cellSize;
+        windowHeight -= windowHeight % cellSize;
+
+        this.width = windowWidth / cellSize;
+        this.height = windowHeight / cellSize;
         this.grid = new Particle[width * height];
         this.clear(); // fill grid with 'Empty' Particle
         this.gridSize = grid.length;
+        this.cellSize = cellSize;
 
         this.modifiedIndices = new HashSet<>();
         this.cleared = false;
+        this.lastUpdateRect = new Rectangle();
 
         // Use CountDownLatch for synchronization
         CountDownLatch latch = new CountDownLatch(1);
@@ -72,7 +80,7 @@ public class Grid {
             public void run() {
                 update();
             }
-        }, 0, updateInterval);
+        }, 0, UPDATE_INTERVAL);
     }
 
     public static void setCursorRadius(int radius) {
@@ -83,6 +91,49 @@ public class Grid {
         cleared = false;
         modifiedIndices.clear();
 
+        gridListener.spawn();
+
+        updateParticles();
+        repaintGrid();
+
+        lastUpdate = System.currentTimeMillis();
+    }
+
+    private void repaintGrid() {
+//        Rectangle rect;
+//        if(cleared) {
+//            gridDrawer.repaintGrid();
+//            return;
+//        } else if(modifiedIndices.isEmpty()) {
+//            // draw cursor
+//            rect = calculateBoundingBox(Arrays.asList(Arrays.stream(cursorIndices).boxed().toArray(Integer[]::new)));
+//        } else {
+//            // add cursorIndices to also draw them
+//            List<Integer> intList = Arrays.asList(Arrays.stream(cursorIndices).boxed().toArray(Integer[]::new));
+//            modifiedIndices.addAll(intList);
+//
+//            rect = calculateBoundingBox(modifiedIndices);
+//        }
+//
+//        DRAW_FINISHED_LATCH = new CountDownLatch(1);
+//        // to prevent leaving stray pixels
+//        Rectangle totalRect = getBoundingRectangle(rect, lastUpdateRect);
+//        gridDrawer.repaintGrid(totalRect);
+//        lastUpdateRect = rect;
+//
+//        try {
+//            DRAW_FINISHED_LATCH.await();
+//        } catch(InterruptedException e) {
+//            throw new RuntimeException(e);
+//        }
+
+        gridDrawer.repaintGrid();
+
+        // fps display
+//        gridDrawer.repaintGrid(new Rectangle(0, 0, 200, 200));
+    }
+
+    private void updateParticles() {
         // backward to not double apply gravity to a particle
         for(int row = height - 1; row >= 0; row--) {
             int rowOffset = row * this.width;
@@ -106,32 +157,33 @@ public class Grid {
                 }
             }
         }
+    }
 
-//        if(cleared) {
-//            gridDrawer.repaintGrid();
-//        } else if(!modifiedIndices.isEmpty()) {
-//            IntSummaryStatistics statsX = modifiedIndices.stream()
-//                    .mapToInt(i -> i % width)
-//                    .summaryStatistics();
-//            IntSummaryStatistics statsY = modifiedIndices.stream().
-//                    mapToInt(i -> i / width).
-//                    summaryStatistics();
-//
-//            int minX = statsX.getMin();
-//            int maxX = statsX.getMax();
-//            int minY = statsY.getMin();
-//            int maxY = statsY.getMax();
-//
-//            int area = (maxX - minX) * (maxY - minY);
-//            int gridArea = width * height;
-//
-//            System.out.println("saved: " + (area / gridArea) * 100 + "%");
-//
-//            gridDrawer.repaintGrid(minX, minY, maxX - minX, maxY - minY);
-//        }
-        gridDrawer.repaintGrid();
+    public Rectangle calculateBoundingBox(Collection<Integer> modifiedIndices) {
+        // Calculate bounding box in a single pass for x and y coordinates
+        IntSummaryStatistics statsX = modifiedIndices.stream().mapToInt(i -> i % width).summaryStatistics();
+        IntSummaryStatistics statsY = modifiedIndices.stream().mapToInt(i -> i / width).summaryStatistics();
 
-        lastUpdate = System.currentTimeMillis();
+        int minX = statsX.getMin() * cellSize;
+        int maxX = statsX.getMax() * cellSize;
+        int minY = statsY.getMin() * cellSize;
+        int maxY = statsY.getMax() * cellSize;
+
+        // Create and return the bounding box
+        return new Rectangle(minX, minY, maxX - minX + cellSize, maxY - minY + cellSize);
+    }
+
+    public Rectangle getBoundingRectangle(Rectangle rect1, Rectangle rect2) {
+        // Calculate the coordinates of the top-left corner
+        int x = Math.min(rect1.x, rect2.x);
+        int y = Math.min(rect1.y, rect2.y);
+
+        // Calculate the dimensions of the bounding rectangle
+        int width = Math.max(rect1.x + rect1.width, rect2.x + rect2.width) - x;
+        int height = Math.max(rect1.y + rect1.height, rect2.y + rect2.height) - y;
+
+        // Create and return the bounding rectangle
+        return new Rectangle(x, y, width, height);
     }
 
     private int updatePixel(int i) {
@@ -176,6 +228,7 @@ public class Grid {
     public void set(int index, Particle particle) {
         if(index >= gridSize) return;
         this.grid[index] = particle;
+
         this.modifiedIndices.add(index);
     }
 
@@ -261,7 +314,11 @@ public class Grid {
         return this.cleared;
     }
 
-    public Set<Integer> getModifiedIndices() {
+    public synchronized Set<Integer> getModifiedIndices() {
         return this.modifiedIndices;
+    }
+
+    public void setGridListener(GridListener gridListener) {
+        this.gridListener = gridListener;
     }
 }

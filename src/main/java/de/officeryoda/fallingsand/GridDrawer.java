@@ -3,8 +3,8 @@ package de.officeryoda.fallingsand;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.image.BufferedImage;
+import java.util.HashSet;
 import java.util.Set;
-import java.util.stream.IntStream;
 
 public class GridDrawer extends JFrame {
 
@@ -47,8 +47,8 @@ public class GridDrawer extends JFrame {
         gridPanel.repaint();
     }
 
-    public void repaintGrid(int x, int y, int width, int height) {
-        gridPanel.repaint(x, y, width, height);
+    public void repaintGrid(Rectangle rect) {
+        gridPanel.repaint(rect.x, rect.y, rect.width, rect.height);
     }
 }
 
@@ -72,10 +72,14 @@ class GridPanel extends JPanel {
     protected void paintComponent(Graphics g) {
         super.paintComponent(g);
 
+        g.setColor(Colors.BACKGROUND_COLOR);
+        g.fillRect(0, 0, getWidth(), getHeight());
         paintCursor(g);
 //        paintGrid(g);
         paintParticles(g);
-        paintFps(g);
+//        paintFps(g);
+
+        Grid.DRAW_FINISHED_LATCH.countDown();
     }
 
     private void paintGrid(Graphics g) {
@@ -100,33 +104,34 @@ class GridPanel extends JPanel {
     }
 
     private void paintParticles(Graphics g) {
-//        Set<Integer> modifiedIndices;
-//        if(grid.isCleared()) {
-            clearPixels(g);
-//            System.out.println("cleared");
-//        } else if(!(modifiedIndices = grid.getModifiedIndices()).isEmpty()) {
-//            System.out.println("modified");
-//            paintModifiedPixels(g, modifiedIndices);
-//        }
-    }
+        Set<Integer> modifiedIndices = new HashSet<>(grid.getModifiedIndices());
 
-    private void paintModifiedPixels(Graphics g, Set<Integer> modifiedIndices) {
-        int bound = modifiedIndices.size();
-        for(int index = 0; index < bound; index++) {
-            int x = index % gridWidth;
-            int y = index / gridWidth;
-            System.out.println("paint: " + index);
-            g.setColor(grid.get(index).getColor());
-            g.fillRect(x * cellSize, y * cellSize, cellSize, cellSize);
+        if(grid.isCleared()) {
+            clearPixels(g);
+        } else if(!modifiedIndices.isEmpty()) {
+            paintModifiedPixels(g, modifiedIndices);
         }
     }
 
+
+    private void paintModifiedPixels(Graphics g, Set<Integer> modifiedIndices) {
+        int gridSize = gridWidth * gridHeight;
+        modifiedIndices.forEach(index -> {
+            if(0 <= index && index < gridSize) {
+                int x = index % gridWidth;
+                int y = index / gridWidth;
+
+                g.setColor(grid.get(index).getColor());
+                g.fillRect(x * cellSize, y * cellSize, cellSize, cellSize);
+            }
+        });
+    }
+
     private void clearPixels(Graphics g) {
-        System.out.println("JUST DRAW A BIG RECTANGLE");
-        for(int x = 0; x < grid.getWidth(); x++) {
-            for(int y = 0; y < grid.getHeight(); y++) {
-                if(grid.isEmpty(x + y * grid.getWidth())) continue;
-                g.setColor(grid.get(x + y * grid.getWidth()).getColor());
+        for(int x = 0; x < gridWidth; x++) {
+            for(int y = 0; y < gridWidth; y++) {
+                if(grid.isEmpty(x + y * gridWidth)) continue;
+                g.setColor(grid.get(x + y * gridWidth).getColor());
                 g.fillRect(x * cellSize, y * cellSize, cellSize, cellSize);
             }
         }
@@ -140,17 +145,17 @@ class GridPanel extends JPanel {
             int index = cursorIndices[i];
             int x = index % gridWidth;
             int y = index / gridWidth;
-
+//            System.out.println("paint Cursor");
             g.setColor(cursorColors[i]);
             g.fillRect(x * cellSize, y * cellSize, cellSize, cellSize);
         }
     }
 
     private void paintFps(Graphics g) {
-        int deltaTime;
+        long deltaTime = (System.currentTimeMillis() - grid.getLastUpdate());
 
         // Ensure that the last update time is not the same as the current time (divide by zero)
-        if((deltaTime = (int) (System.currentTimeMillis() - grid.getLastUpdate())) == 0) return;
+        if(deltaTime == 0) return;
 
         int fps = (int) (1000 / deltaTime);
 

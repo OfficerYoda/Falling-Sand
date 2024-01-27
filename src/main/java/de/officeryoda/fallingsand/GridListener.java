@@ -9,39 +9,45 @@ import java.awt.event.MouseEvent;
 import java.awt.event.MouseWheelEvent;
 import java.awt.event.MouseWheelListener;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.TimerTask;
-import java.util.Timer;
 
 public class GridListener extends MouseAdapter implements MouseWheelListener {
 
     private final Grid grid;
     private final int cellSize;
     private final JFrame jFrame;
-    private boolean isLeftPressed;
-    private boolean isMiddlePressed;
+    private boolean leftPressed;
+    private boolean middlePressed;
+    private boolean rightPressed;
+
 
     public GridListener(Grid grid, int cellSize, JFrame jFrame) {
         this.grid = grid;
         this.cellSize = cellSize;
         this.jFrame = jFrame;
-        this.isLeftPressed = false;
+        this.leftPressed = false;
 
-        // Call your method here
-//        Timer timer = new Timer(Grid.updateInterval, e -> spawn());
-//
-//        timer.start();
-
-        Timer timer = new java.util.Timer(true);
-        timer.scheduleAtFixedRate(new TimerTask() {
-            @Override
-            public void run() {
-                spawn();
-            }
-        }, 0, Grid.updateInterval);
+        grid.setGridListener(this);
     }
 
-    private void spawn() {
+    public void spawn() {
+        int[] cursorIndices = setCursorIndices();
+
+        if(rightPressed) {
+            grid.clear();
+            rightPressed = false;
+        }
+
+        if(!leftPressed) return;
+//        grid.set(cursorIndices[0], ParticleFactory.createParticle());
+        for(int index : cursorIndices) {
+            if(index < 0) continue;
+            if(Math.random() < 0.5) {
+                grid.set(index, createSelectedParticle());
+            }
+        }
+    }
+
+    private int[] setCursorIndices() {
         Point mousePos = MouseInfo.getPointerInfo().getLocation();
         SwingUtilities.convertPointFromScreen(mousePos, jFrame);
 
@@ -55,21 +61,14 @@ public class GridListener extends MouseAdapter implements MouseWheelListener {
         if(x < 0 || x > grid.getWidth() * cellSize ||
                 y < 0 || y > grid.getHeight() * cellSize) {
             grid.setCursorIndices(new int[0]);
-            return;
+            System.out.println("invalid cursor pos");
+            return new int[0];
         }
 
         int cursorIndex = x / cellSize + y / cellSize * grid.getWidth();
         int[] cursorIndices = getIndicesInRadius(cursorIndex, Grid.CURSOR_RADIUS);
         grid.setCursorIndices(cursorIndices);
-
-        if(!isLeftPressed) return;
-        grid.set(cursorIndices[0], ParticleFactory.createParticle());
-        for(int index : cursorIndices) {
-            if(index < 0) continue;
-            if(Math.random() < 0.5) {
-                grid.set(index, getSelectedParticle());
-            }
-        }
+        return cursorIndices;
     }
 
     private int[] getIndicesInRadius(int centerIndex, int radius) {
@@ -127,7 +126,7 @@ public class GridListener extends MouseAdapter implements MouseWheelListener {
         Grid.setCursorRadius(Grid.CURSOR_RADIUS - wheelRotation);
     }
 
-    public Particle getSelectedParticle() {
+    public Particle createSelectedParticle() {
         Particle particle = ParticleFactory.createParticle();
         grid.updateCursorColors();
         return particle;
@@ -137,13 +136,13 @@ public class GridListener extends MouseAdapter implements MouseWheelListener {
     public void mousePressed(MouseEvent e) {
         switch(e.getButton()) {
             case MouseEvent.BUTTON1:
-                isLeftPressed = true;
+                leftPressed = true;
                 break;
             case MouseEvent.BUTTON2:
-                isMiddlePressed = true;
+                middlePressed = true;
                 break;
             case MouseEvent.BUTTON3:
-                grid.clear();
+                rightPressed = true;
                 break;
         }
     }
@@ -152,12 +151,18 @@ public class GridListener extends MouseAdapter implements MouseWheelListener {
     public void mouseReleased(MouseEvent e) {
         switch(e.getButton()) {
             case MouseEvent.BUTTON1:
-                isLeftPressed = false;
+                leftPressed = false;
                 break;
             case MouseEvent.BUTTON2:
-                isMiddlePressed = false;
+                middlePressed = false;
                 break;
         }
+    }
+
+    @Override
+    public void mouseEntered(MouseEvent e) {
+        super.mouseEntered(e);
+        setCursorIndices();
     }
 
     @Override
@@ -169,7 +174,7 @@ public class GridListener extends MouseAdapter implements MouseWheelListener {
     @Override
     public void mouseWheelMoved(MouseWheelEvent e) {
         super.mouseWheelMoved(e);
-        if(isMiddlePressed) {
+        if(middlePressed) {
             changeCursorSize(e);
         } else {
             ParticleFactory.nextParticle();
