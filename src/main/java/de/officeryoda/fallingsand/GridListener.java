@@ -1,5 +1,7 @@
 package de.officeryoda.fallingsand;
 
+import de.officeryoda.fallingsand.particle.Sand;
+
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
@@ -10,7 +12,6 @@ public class GridListener extends MouseAdapter implements MouseWheelListener {
     private final Grid grid;
     private final int cellSize;
     private final JFrame jFrame;
-    private final Timer timer;
 
     private boolean isLeftPressed;
 
@@ -20,7 +21,8 @@ public class GridListener extends MouseAdapter implements MouseWheelListener {
         this.jFrame = jFrame;
         this.isLeftPressed = false;
 
-        this.timer = new Timer(Grid.updateInterval, new ActionListener() {
+        // Call your method here
+        Timer timer = new Timer(Grid.updateInterval, new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
                 // Call your method here
@@ -28,7 +30,7 @@ public class GridListener extends MouseAdapter implements MouseWheelListener {
             }
         });
 
-        this.timer.start();
+        timer.start();
     }
 
     public static int varyColor(int color) {
@@ -68,7 +70,7 @@ public class GridListener extends MouseAdapter implements MouseWheelListener {
         for(int index : cursorIndices) {
             if(index < 0) continue;
             if(Math.random() < 0.5) {
-                grid.set(index, varyColor(Grid.SAND_COLOR_RGB));
+                grid.set(index, new Sand());
             }
         }
     }

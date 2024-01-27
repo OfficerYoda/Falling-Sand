@@ -1,7 +1,11 @@
 package de.officeryoda.fallingsand;
 
+import de.officeryoda.fallingsand.particle.Empty;
+import de.officeryoda.fallingsand.particle.Particle;
+
 import javax.swing.*;
 import java.awt.*;
+import java.util.Arrays;
 import java.util.Timer;
 import java.util.TimerTask;
 import java.util.concurrent.CountDownLatch;
@@ -21,7 +25,7 @@ public class Grid {
     private final int width;
     private final int height;
     private final int gridSize;
-    private int[] grid;
+    private Particle[] grid;
     private GridDrawer gridDrawer;
 
     private int[] cursorIndices = new int[0];
@@ -36,7 +40,8 @@ public class Grid {
     public Grid(int width, int height, int cellSize) {
         this.width = width - width % cellSize; // mod to get rid of any extra
         this.height = height - height % cellSize; // mod to get rid of any extra
-        this.grid = new int[width * height];
+        this.grid = new Particle[width * height];
+        this.clear(); // fill grid with 'Empty' Particle
         this.gridSize = grid.length;
 
         // Use CountDownLatch for synchronization
@@ -68,7 +73,7 @@ public class Grid {
     }
 
     private void update() {
-        long startTime = System.currentTimeMillis();
+//        long startTime = System.currentTimeMillis();
 
         // backward to not double apply gravity to a particle
         for(int row = height - 1; row >= 0; row--) {
@@ -83,8 +88,7 @@ public class Grid {
 
         gridDrawer.repaintGrid();
 
-        long endTime = System.currentTimeMillis();
-
+//        long endTime = System.currentTimeMillis();
 //        System.out.println("updateTime: " + (endTime - startTime) + "ms");
     }
 
@@ -111,29 +115,30 @@ public class Grid {
      * Clears the grid, resetting all values to the default.
      */
     public void clear() {
-        this.grid = new int[width * height];
+        Empty empty = new Empty();
+        Arrays.fill(grid, empty);
     }
 
     /**
      * Sets the color of a specific particle at the given coordinates.
      *
-     * @param x     The x-coordinate.
-     * @param y     The y-coordinate.
-     * @param color The color to set for the particle.
+     * @param x        The x-coordinate.
+     * @param y        The y-coordinate.
+     * @param particle The particle.
      */
-    public void set(int x, int y, int color) {
-        this.set(x + y * this.width, color);
+    public void set(int x, int y, Particle particle) {
+        this.set(x + y * this.width, particle);
     }
 
     /**
      * Sets the color of a specific particle at the given index.
      *
-     * @param index The index.
-     * @param color The color to set for the particle.
+     * @param index    The index.
+     * @param particle The Particle.
      */
-    public void set(int index, int color) {
+    public void set(int index, Particle particle) {
         if(index >= gridSize) return;
-        this.grid[index] = color;
+        this.grid[index] = particle;
     }
 
     /**
@@ -143,7 +148,7 @@ public class Grid {
      * @param y The y-coordinate.
      * @return The value at the specified grid position.
      */
-    public int get(int x, int y) {
+    public Particle get(int x, int y) {
         return this.grid[x + y * width];
     }
 
@@ -154,7 +159,7 @@ public class Grid {
      * @param indexB The index of the second particle.
      */
     public void swap(int indexA, int indexB) {
-        int temp = this.grid[indexA];
+        Particle temp = this.grid[indexA];
         this.grid[indexA] = this.grid[indexB];
         this.grid[indexB] = temp;
     }
@@ -167,7 +172,7 @@ public class Grid {
      */
     public boolean isEmpty(int index) {
         if(index >= gridSize) return false;
-        return this.grid[index] == 0;
+        return this.grid[index].isEmpty();
     }
 
     /**
