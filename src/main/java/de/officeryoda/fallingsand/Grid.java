@@ -1,10 +1,7 @@
 package de.officeryoda.fallingsand;
 
 import javax.swing.*;
-import javax.swing.plaf.ColorUIResource;
 import java.awt.*;
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Timer;
 import java.util.TimerTask;
 import java.util.concurrent.CountDownLatch;
@@ -18,13 +15,13 @@ public class Grid {
     public static final int SAND_COLOR_RGB = SAND_COLOR.getRGB();
     public static int CURSOR_RADIUS = 3;
 
-    public static int updatesPerSecond = 100;
+    public static int updatesPerSecond = 60;
     public static int updateInterval = (int) (1f / updatesPerSecond * 1000); // time in ms
 
     private final int width;
     private final int height;
     private final int gridSize;
-    private ArrayList<Integer> grid;
+    private int[] grid;
     private GridDrawer gridDrawer;
 
     private int[] cursorIndices = new int[0];
@@ -39,8 +36,8 @@ public class Grid {
     public Grid(int width, int height, int cellSize) {
         this.width = width - width % cellSize; // mod to get rid of any extra
         this.height = height - height % cellSize; // mod to get rid of any extra
-        this.grid = new ArrayList<>(Collections.nCopies(width * height, 0));
-        this.gridSize = grid.size();
+        this.grid = new int[width * height];
+        this.gridSize = grid.length;
 
         // Use CountDownLatch for synchronization
         CountDownLatch latch = new CountDownLatch(1);
@@ -66,39 +63,55 @@ public class Grid {
         }, 0, updateInterval);
     }
 
+    public static void setCursorRadius(int radius) {
+        Grid.CURSOR_RADIUS = Math.max(1, radius);
+    }
+
     private void update() {
+        long startTime = System.currentTimeMillis();
+
         // backward to not double apply gravity to a particle
-        for(int i = this.gridSize - this.width - 1; i >= 0; i--) {
-//            for(int i = 0; i < this.gridSize - this.width - 1; i++) {
-
-            int x = i % width;
-            int y = i / width;
-
-            // Get the indices of the pixels directly below
-            int dir = Math.random() < 0.5 ? 1 : -1;
-
-            int below = i + width;
-            int belowA = below - dir;
-            int belowB = below + dir;
-
-            // If there are no pixels below, including diagonals, move it accordingly.
-            if(isEmpty(below)) {
-                swap(i, below);
-            } else if(isEmpty(belowA)) {
-                swap(i, belowA);
-            } else if(isEmpty(belowB)) {
-                swap(i, belowB);
+        for(int row = height - 1; row >= 0; row--) {
+            int rowOffset = row * this.width;
+            boolean leftToRight = Math.random() > 0.5;
+            for(int i = 0; i < this.width; i++) {
+                // Go from right to left or left to right depending on our random value
+                int columnOffset = leftToRight ? i : -i - 1 + this.width;
+                updatePixel(rowOffset + columnOffset);
             }
         }
 
         gridDrawer.repaintGrid();
+
+        long endTime = System.currentTimeMillis();
+
+//        System.out.println("updateTime: " + (endTime - startTime) + "ms");
+    }
+
+    private void updatePixel(int i) {
+        if(isEmpty(i)) return;
+
+        // Get the indices of the pixels directly below
+        int below = i + width;
+        int belowA = below - 1;
+        int belowB = below + 1;
+        int column = i % this.width;
+
+        // If there are no pixels below, including diagonals, move it accordingly.
+        if(isEmpty(below)) {
+            swap(i, below);
+        } else if(this.isEmpty(belowA) && belowA % this.width < column) { // Check to make sure belowLeft didn't wrap to the next line
+            this.swap(i, belowA);
+        } else if(this.isEmpty(belowB) && belowB % this.width > column) { // Check to make sure belowRight didn't wrap to the next line
+            this.swap(i, belowB);
+        }
     }
 
     /**
      * Clears the grid, resetting all values to the default.
      */
     public void clear() {
-        this.grid = new ArrayList<>(Collections.nCopies(width * height, 0));
+        this.grid = new int[width * height];
     }
 
     /**
@@ -120,7 +133,7 @@ public class Grid {
      */
     public void set(int index, int color) {
         if(index >= gridSize) return;
-        this.grid.set(index, color);
+        this.grid[index] = color;
     }
 
     /**
@@ -131,9 +144,8 @@ public class Grid {
      * @return The value at the specified grid position.
      */
     public int get(int x, int y) {
-        return this.grid.get(x + y * width);
+        return this.grid[x + y * width];
     }
-
 
     /**
      * Swaps the positions of two particles (or empty spaces) in the grid.
@@ -142,9 +154,9 @@ public class Grid {
      * @param indexB The index of the second particle.
      */
     public void swap(int indexA, int indexB) {
-        int temp = this.grid.get(indexA);
-        this.grid.set(indexA, this.grid.get(indexB));
-        this.grid.set(indexB, temp);
+        int temp = this.grid[indexA];
+        this.grid[indexA] = this.grid[indexB];
+        this.grid[indexB] = temp;
     }
 
     /**
@@ -155,7 +167,7 @@ public class Grid {
      */
     public boolean isEmpty(int index) {
         if(index >= gridSize) return false;
-        return this.grid.get(index) == 0;
+        return this.grid[index] == 0;
     }
 
     /**
@@ -204,9 +216,5 @@ public class Grid {
 
     public Color[] getCursorColors() {
         return this.cursorColors;
-    }
-
-    public static void setCursorRadius(int radius) {
-        Grid.CURSOR_RADIUS = Math.max(1, radius);
     }
 }

@@ -101,7 +101,6 @@ public class GridListener extends MouseAdapter implements MouseWheelListener {
         int width = grid.getWidth();
         int centerX = centerIndex % width;
         int centerY = centerIndex / width;
-        int sqrRadius = radius * radius;
 
         java.util.List<Integer> indices = new ArrayList<>();
 
