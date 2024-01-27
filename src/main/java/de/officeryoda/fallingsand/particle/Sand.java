@@ -7,6 +7,6 @@ import java.awt.*;
 public class Sand extends Particle {
 
     public Sand() {
-        super(Colors.SAND_COLOR, false, 10000, 0.4);
+        super(Colors.SAND_COLOR, Colors.varyColor(Colors.SAND_COLOR),false, 10000, 0.4);
     }
 }

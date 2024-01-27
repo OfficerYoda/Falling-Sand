@@ -4,8 +4,11 @@ import java.awt.*;
 
 public class Colors {
 
+    public static final Color BACKGROUND_COLOR = Color.decode("#010409");
+
     public static final Color SAND_COLOR = Color.decode("#dcb159");
-    public static final int SAND_COLOR_RGB = SAND_COLOR.getRGB();
+
+    public static final Color WOOD_COLOR = Color.decode("#46281d");
 
     public static int varyColor(int colorInt) {
         float[] hsb = new float[3];

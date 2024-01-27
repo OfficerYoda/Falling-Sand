@@ -2,13 +2,12 @@ package de.officeryoda.fallingsand;
 
 import de.officeryoda.fallingsand.particle.Empty;
 import de.officeryoda.fallingsand.particle.Particle;
-import de.officeryoda.fallingsand.particle.Sand;
+import de.officeryoda.fallingsand.particle.ParticleFactory;
 
 import javax.swing.*;
 import java.awt.*;
-import java.util.Arrays;
 import java.util.Timer;
-import java.util.TimerTask;
+import java.util.*;
 import java.util.concurrent.CountDownLatch;
 
 /**
@@ -24,7 +23,11 @@ public class Grid {
     private final int width;
     private final int height;
     private final int gridSize;
-    private Particle[] grid;
+    private final Particle[] grid;
+
+    private final Set<Integer> modifiedIndices;
+    private boolean cleared; // if we cleared all pixels last update
+
     private GridDrawer gridDrawer;
 
     private int[] cursorIndices = new int[0];
@@ -44,6 +47,9 @@ public class Grid {
         this.grid = new Particle[width * height];
         this.clear(); // fill grid with 'Empty' Particle
         this.gridSize = grid.length;
+
+        this.modifiedIndices = new HashSet<>();
+        this.cleared = false;
 
         // Use CountDownLatch for synchronization
         CountDownLatch latch = new CountDownLatch(1);
@@ -74,6 +80,9 @@ public class Grid {
     }
 
     private void update() {
+        cleared = false;
+        modifiedIndices.clear();
+
         // backward to not double apply gravity to a particle
         for(int row = height - 1; row >= 0; row--) {
             int rowOffset = row * this.width;
@@ -98,6 +107,28 @@ public class Grid {
             }
         }
 
+//        if(cleared) {
+//            gridDrawer.repaintGrid();
+//        } else if(!modifiedIndices.isEmpty()) {
+//            IntSummaryStatistics statsX = modifiedIndices.stream()
+//                    .mapToInt(i -> i % width)
+//                    .summaryStatistics();
+//            IntSummaryStatistics statsY = modifiedIndices.stream().
+//                    mapToInt(i -> i / width).
+//                    summaryStatistics();
+//
+//            int minX = statsX.getMin();
+//            int maxX = statsX.getMax();
+//            int minY = statsY.getMin();
+//            int maxY = statsY.getMax();
+//
+//            int area = (maxX - minX) * (maxY - minY);
+//            int gridArea = width * height;
+//
+//            System.out.println("saved: " + (area / gridArea) * 100 + "%");
+//
+//            gridDrawer.repaintGrid(minX, minY, maxX - minX, maxY - minY);
+//        }
         gridDrawer.repaintGrid();
 
         lastUpdate = System.currentTimeMillis();
@@ -133,17 +164,7 @@ public class Grid {
     public void clear() {
         Empty empty = new Empty();
         Arrays.fill(grid, empty);
-    }
-
-    /**
-     * Sets the color of a specific particle at the given coordinates.
-     *
-     * @param x        The x-coordinate.
-     * @param y        The y-coordinate.
-     * @param particle The particle.
-     */
-    public void set(int x, int y, Particle particle) {
-        this.set(x + y * this.width, particle);
+        cleared = true;
     }
 
     /**
@@ -155,17 +176,11 @@ public class Grid {
     public void set(int index, Particle particle) {
         if(index >= gridSize) return;
         this.grid[index] = particle;
+        this.modifiedIndices.add(index);
     }
 
-    /**
-     * Gets the value at a specific grid position.
-     *
-     * @param x The x-coordinate.
-     * @param y The y-coordinate.
-     * @return The value at the specified grid position.
-     */
-    public Particle get(int x, int y) {
-        return this.grid[x + y * width];
+    public Particle get(int index) {
+        return this.grid[index];
     }
 
     /**
@@ -175,6 +190,8 @@ public class Grid {
      * @param indexB The index of the second particle.
      */
     public void swap(int indexA, int indexB) {
+        if(this.grid[indexA].isEmpty() && this.grid[indexB].isEmpty()) return;
+
         Particle temp = this.grid[indexA];
         this.set(indexA, this.grid[indexB]);
         this.set(indexB, temp);
@@ -189,17 +206,6 @@ public class Grid {
     public boolean isEmpty(int index) {
         if(index >= gridSize) return false;
         return this.grid[index].isEmpty();
-    }
-
-    /**
-     * Checks if a specific space in the grid is empty.
-     *
-     * @param x The x-coordinate.
-     * @param y The y-coordinate.
-     * @return True if the space is empty, false otherwise.
-     */
-    public boolean isEmpty(int x, int y) {
-        return isEmpty(x + y * width);
     }
 
     /**
@@ -229,10 +235,17 @@ public class Grid {
 
         if(cursorIndices.length <= cursorColors.length) return;
 
+        updateCursorColors();
+    }
+
+    public void updateCursorColors() {
         cursorColors = new Color[cursorIndices.length];
-        Sand sand = new Sand();
+        if(cursorIndices.length == 0) return; // needs testing
+
+        Particle particle = ParticleFactory.createParticle();
+        Color color = particle.getBaseColor();
         for(int i = 0; i < cursorIndices.length; i++) {
-            cursorColors[i] = Colors.varyColor(Colors.SAND_COLOR);
+            cursorColors[i] = particle.isEmpty() ? color : Colors.varyColor(color);
         }
     }
 
@@ -242,5 +255,13 @@ public class Grid {
 
     public long getLastUpdate() {
         return this.lastUpdate;
+    }
+
+    public boolean isCleared() {
+        return this.cleared;
+    }
+
+    public Set<Integer> getModifiedIndices() {
+        return this.modifiedIndices;
     }
 }

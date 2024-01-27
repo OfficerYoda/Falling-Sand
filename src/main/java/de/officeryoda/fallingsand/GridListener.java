@@ -1,19 +1,25 @@
 package de.officeryoda.fallingsand;
 
-import de.officeryoda.fallingsand.particle.Sand;
+import de.officeryoda.fallingsand.particle.*;
 
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.*;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseWheelEvent;
+import java.awt.event.MouseWheelListener;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.TimerTask;
+import java.util.Timer;
 
 public class GridListener extends MouseAdapter implements MouseWheelListener {
 
     private final Grid grid;
     private final int cellSize;
     private final JFrame jFrame;
-
     private boolean isLeftPressed;
+    private boolean isMiddlePressed;
 
     public GridListener(Grid grid, int cellSize, JFrame jFrame) {
         this.grid = grid;
@@ -22,9 +28,17 @@ public class GridListener extends MouseAdapter implements MouseWheelListener {
         this.isLeftPressed = false;
 
         // Call your method here
-        Timer timer = new Timer(Grid.updateInterval, e -> spawn());
+//        Timer timer = new Timer(Grid.updateInterval, e -> spawn());
+//
+//        timer.start();
 
-        timer.start();
+        Timer timer = new java.util.Timer(true);
+        timer.scheduleAtFixedRate(new TimerTask() {
+            @Override
+            public void run() {
+                spawn();
+            }
+        }, 0, Grid.updateInterval);
     }
 
     private void spawn() {
@@ -49,11 +63,11 @@ public class GridListener extends MouseAdapter implements MouseWheelListener {
         grid.setCursorIndices(cursorIndices);
 
         if(!isLeftPressed) return;
-//        grid.set(cursorIndices[0], Grid.SAND_COLOR_RGB);
+        grid.set(cursorIndices[0], ParticleFactory.createParticle());
         for(int index : cursorIndices) {
             if(index < 0) continue;
             if(Math.random() < 0.5) {
-                grid.set(index, new Sand());
+                grid.set(index, getSelectedParticle());
             }
         }
     }
@@ -108,19 +122,41 @@ public class GridListener extends MouseAdapter implements MouseWheelListener {
         return deltaX * deltaX + deltaY * deltaY;
     }
 
+    private void changeCursorSize(MouseWheelEvent e) {
+        int wheelRotation = e.getWheelRotation(); // -1 = up; 1 = down
+        Grid.setCursorRadius(Grid.CURSOR_RADIUS - wheelRotation);
+    }
+
+    public Particle getSelectedParticle() {
+        Particle particle = ParticleFactory.createParticle();
+        grid.updateCursorColors();
+        return particle;
+    }
+
     @Override
     public void mousePressed(MouseEvent e) {
-        if(e.getButton() == MouseEvent.BUTTON1) {
-            isLeftPressed = true;
-        } else if(e.getButton() == MouseEvent.BUTTON3) {
-            grid.clear();
+        switch(e.getButton()) {
+            case MouseEvent.BUTTON1:
+                isLeftPressed = true;
+                break;
+            case MouseEvent.BUTTON2:
+                isMiddlePressed = true;
+                break;
+            case MouseEvent.BUTTON3:
+                grid.clear();
+                break;
         }
     }
 
     @Override
     public void mouseReleased(MouseEvent e) {
-        if(e.getButton() == MouseEvent.BUTTON1) {
-            isLeftPressed = false;
+        switch(e.getButton()) {
+            case MouseEvent.BUTTON1:
+                isLeftPressed = false;
+                break;
+            case MouseEvent.BUTTON2:
+                isMiddlePressed = false;
+                break;
         }
     }
 
@@ -133,7 +169,11 @@ public class GridListener extends MouseAdapter implements MouseWheelListener {
     @Override
     public void mouseWheelMoved(MouseWheelEvent e) {
         super.mouseWheelMoved(e);
-        int wheelRotation = e.getWheelRotation(); // -1 = up; 1 = down
-        Grid.setCursorRadius(Grid.CURSOR_RADIUS - wheelRotation);
+        if(isMiddlePressed) {
+            changeCursorSize(e);
+        } else {
+            ParticleFactory.nextParticle();
+            grid.updateCursorColors();
+        }
     }
 }

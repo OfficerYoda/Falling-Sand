@@ -6,14 +6,16 @@ import java.awt.*;
 
 public abstract class Particle {
 
+    protected Color baseColor;
     protected Color color;
     protected boolean isEmpty;
     protected double velocity;
     protected double maxVelocity;
     protected double acceleration;
 
-    protected Particle(Color color, boolean isEmpty, double maxVelocity, double acceleration) {
-        this.color = Colors.varyColor(color);
+    protected Particle(Color baseColor, Color color, boolean isEmpty, double maxVelocity, double acceleration) {
+        this.baseColor = baseColor;
+        this.color = color;
         this.isEmpty = isEmpty;
         this.velocity = 0;
         this.maxVelocity = maxVelocity;
@@ -44,5 +46,9 @@ public abstract class Particle {
 
     public boolean isEmpty() {
         return this.isEmpty;
+    }
+
+    public Color getBaseColor() {
+        return this.baseColor;
     }
 }
