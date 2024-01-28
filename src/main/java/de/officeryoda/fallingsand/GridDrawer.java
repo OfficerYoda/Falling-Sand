@@ -6,8 +6,10 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.geom.AffineTransform;
 import java.awt.image.BufferedImage;
+import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
-import java.util.*;
+import java.util.Map;
 
 public class GridDrawer extends JFrame {
 
@@ -83,13 +85,10 @@ class GridPanel extends JPanel {
     protected void paintComponent(Graphics g) {
         super.paintComponent(g);
 
-//        g.setColor(Colors.varyColor(Colors.BACKGROUND_COLOR));
-//        g.fillRect(0, 0, getWidth(), getHeight());
 //        paintParticles(g);
         paintParticleImage(g);
         if(GridListener.paintCursor) {
-            paintCursorNew(g);
-//            paintCursor(g);
+            paintCursor(g);
         }
 //        paintGrid(g);
 //        paintFps(g);
@@ -157,28 +156,9 @@ class GridPanel extends JPanel {
     }
 
     private void paintCursor(Graphics g) {
-        List<Integer> cursorIndices = Arrays.stream(Arrays.stream(grid.getCursorIndices()).boxed().toArray(Integer[]::new)).toList();
-        Set<Integer> cursorIndicesSet = new HashSet<>(cursorIndices);
-        Color[] cursorColors = grid.getCursorColors();
-
-        int maxX = boundsRect.x + boundsRect.width;
-        int maxY = boundsRect.y + boundsRect.height;
-
-        for(int x = boundsRect.x; x < maxX; x++) {
-            for(int y = boundsRect.y; y < maxY; y++) {
-                int index = x + y * gridWidth;
-                int cursorIdx = cursorIndicesSet.contains(index) ? cursorIndices.indexOf(index) : -1;
-
-                Color color = cursorIdx == -1 ? grid.get(index).getColor() : cursorColors[cursorIdx];
-                paintPixel(x, y, color, g);
-            }
-        }
-    }
-
-    // new cursor implementation start
-
-    private void paintCursorNew(Graphics g) {
         Integer[] cursorIndices = Arrays.stream(grid.getCursorIndices()).boxed().toArray(Integer[]::new);
+        if(cursorIndices.length == 0) return;
+
         Color[] cursorColors = grid.getCursorColors();
         Map<Integer, Integer> indexMap = getIndexMap(cursorIndices);
 
@@ -202,8 +182,6 @@ class GridPanel extends JPanel {
 
         g.drawImage(image, rect.x * cellSize, rect.y * cellSize, this);
     }
-
-    // new cursor implementation end
 
     private void paintPixel(int x, int y, Color color, Graphics g) {
         g.setColor(color);
