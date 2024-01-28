@@ -1,10 +1,13 @@
 package de.officeryoda.fallingsand;
 
+import org.jetbrains.annotations.NotNull;
+
 import javax.swing.*;
 import java.awt.*;
+import java.awt.geom.AffineTransform;
 import java.awt.image.BufferedImage;
-import java.util.Arrays;
 import java.util.List;
+import java.util.*;
 
 public class GridDrawer extends JFrame {
 
@@ -29,7 +32,7 @@ public class GridDrawer extends JFrame {
         addMouseListener(gridListener);
         addMouseWheelListener(gridListener);
 
-//        setInvisibleCursor();
+        setInvisibleCursor();
 
         setLocationRelativeTo(null); // center the frame on the screen
         setVisible(true);
@@ -51,6 +54,7 @@ public class GridDrawer extends JFrame {
 
     public void repaintGrid(Rectangle rect) {
         gridPanel.setBoundsRect(rect);
+//        gridPanel.repaint();
         gridPanel.repaint(rect.x * cellSize, rect.y * cellSize, rect.width * cellSize, rect.height * cellSize);
     }
 }
@@ -81,12 +85,27 @@ class GridPanel extends JPanel {
 
 //        g.setColor(Colors.varyColor(Colors.BACKGROUND_COLOR));
 //        g.fillRect(0, 0, getWidth(), getHeight());
-        paintParticles(g);
-        paintCursor(g);
+//        paintParticles(g);
+        paintParticleImage(g);
+        if(GridListener.paintCursor) {
+            paintCursorNew(g);
+//            paintCursor(g);
+        }
 //        paintGrid(g);
 //        paintFps(g);
 
         Grid.DRAW_FINISHED_LATCH.countDown();
+    }
+
+    private void paintParticleImage(Graphics g) {
+        int[] colors = Arrays.stream(grid.getGrid()).mapToInt(particle -> particle.getColor().getRGB()).toArray();
+        BufferedImage image = new BufferedImage(gridWidth, gridHeight, BufferedImage.TYPE_INT_RGB);
+        image.setRGB(0, 0, gridWidth, gridHeight, colors, 0, gridWidth);
+
+        BufferedImage scaledImage = scaleImage(image, cellSize);
+
+        // Draw the scaled image onto the panel
+        g.drawImage(scaledImage, 0, 0, this);
     }
 
     private void paintGrid(Graphics g) {
@@ -139,6 +158,7 @@ class GridPanel extends JPanel {
 
     private void paintCursor(Graphics g) {
         List<Integer> cursorIndices = Arrays.stream(Arrays.stream(grid.getCursorIndices()).boxed().toArray(Integer[]::new)).toList();
+        Set<Integer> cursorIndicesSet = new HashSet<>(cursorIndices);
         Color[] cursorColors = grid.getCursorColors();
 
         int maxX = boundsRect.x + boundsRect.width;
@@ -147,13 +167,45 @@ class GridPanel extends JPanel {
         for(int x = boundsRect.x; x < maxX; x++) {
             for(int y = boundsRect.y; y < maxY; y++) {
                 int index = x + y * gridWidth;
-                int cursorIdx = cursorIndices.indexOf(index);
+                int cursorIdx = cursorIndicesSet.contains(index) ? cursorIndices.indexOf(index) : -1;
 
                 Color color = cursorIdx == -1 ? grid.get(index).getColor() : cursorColors[cursorIdx];
                 paintPixel(x, y, color, g);
             }
         }
     }
+
+    // new cursor implementation start
+
+    private void paintCursorNew(Graphics g) {
+        Integer[] cursorIndices = Arrays.stream(grid.getCursorIndices()).boxed().toArray(Integer[]::new);
+        Color[] cursorColors = grid.getCursorColors();
+        Map<Integer, Integer> indexMap = getIndexMap(cursorIndices);
+
+        Rectangle rect = GridUtility.calculateBoundingRect(cursorIndices, gridWidth);
+        int maxX = rect.x + rect.width;
+        int maxY = rect.y + rect.height;
+
+        BufferedImage image = new BufferedImage(rect.width * cellSize, rect.height * cellSize, BufferedImage.TYPE_INT_ARGB);
+        Graphics2D g2d = image.createGraphics();
+
+        for(int x = 0; x < maxX; x++) {
+            for(int y = 0; y < maxY; y++) {
+                int index = x + y * gridWidth;
+                int cursorIndex = indexMap.getOrDefault(index, -1);
+                Color color = cursorIndex == -1 ? grid.get(index).getColor() : cursorColors[cursorIndex];
+
+                g2d.setColor(color);
+                g2d.fillRect((x - rect.x) * cellSize, (y - rect.y) * cellSize, cellSize, cellSize);
+            }
+        }
+
+        g2d.dispose();
+
+        g.drawImage(image, rect.x * cellSize, rect.y * cellSize, this);
+    }
+
+    // new cursor implementation end
 
     private void paintPixel(int x, int y, Color color, Graphics g) {
         g.setColor(color);
@@ -177,6 +229,36 @@ class GridPanel extends JPanel {
         g.setFont(font);
         g.setColor(Color.WHITE);
         g.drawString("FPS: " + fps, 5, GridDrawer.TITLE_BAR_HEIGHT);
+    }
+
+    private @NotNull Map<Integer, Integer> getIndexMap(Integer[] array) {
+        List<Integer> list = Arrays.stream(array).toList();
+        Map<Integer, Integer> map = new HashMap<>();
+        for(Integer entry : list) {
+            map.put(entry, list.indexOf(entry));
+        }
+        return map;
+    }
+
+    @NotNull
+    private BufferedImage scaleImage(BufferedImage image, int scaleFactor) {
+        // Create an AffineTransform for scaling
+        AffineTransform transform = new AffineTransform();
+        transform.scale(scaleFactor, scaleFactor);
+
+        // Apply the transformation to the image
+        BufferedImage scaledImage = new BufferedImage(
+                gridWidth * scaleFactor,
+                gridHeight * scaleFactor,
+                BufferedImage.TYPE_INT_RGB);
+
+        Graphics2D g2d = scaledImage.createGraphics();
+        g2d.setTransform(transform);
+        g2d.drawImage(image, 0, 0, this);
+
+        // Dispose the graphics context to free resources
+        g2d.dispose();
+        return scaledImage;
     }
 
     void setBoundsRect(Rectangle boundsRect) {

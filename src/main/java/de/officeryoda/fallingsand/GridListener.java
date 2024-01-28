@@ -1,6 +1,6 @@
 package de.officeryoda.fallingsand;
 
-import de.officeryoda.fallingsand.particle.*;
+import de.officeryoda.fallingsand.particle.ParticleFactory;
 
 import javax.swing.*;
 import java.awt.*;
@@ -12,13 +12,13 @@ import java.util.ArrayList;
 
 public class GridListener extends MouseAdapter implements MouseWheelListener {
 
+    public static boolean paintCursor = true;
     private final Grid grid;
     private final int cellSize;
     private final JFrame jFrame;
     private boolean leftPressed;
     private boolean middlePressed;
     private boolean rightPressed;
-
 
     public GridListener(Grid grid, int cellSize, JFrame jFrame) {
         this.grid = grid;
@@ -167,6 +167,14 @@ public class GridListener extends MouseAdapter implements MouseWheelListener {
     public void mouseExited(MouseEvent e) {
         super.mouseExited(e);
         grid.setCursorIndices(new int[0]);
+    }
+
+    @Override
+    public void mouseClicked(MouseEvent e) {
+        super.mouseClicked(e);
+        if(e.getButton() == MouseEvent.BUTTON2) {
+            paintCursor = !paintCursor;
+        }
     }
 
     @Override
