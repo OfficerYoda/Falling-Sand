@@ -183,7 +183,7 @@ public class Grid {
     }
 
     public Particle get(int index) {
-        if(index >= gridSize) return ParticleFactory.createParticle(0);
+        if(gridSize <= index) return ParticleFactory.createParticle(0);
         return this.grid[index];
     }
 

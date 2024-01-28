@@ -9,6 +9,7 @@ import java.awt.event.MouseEvent;
 import java.awt.event.MouseWheelEvent;
 import java.awt.event.MouseWheelListener;
 import java.util.ArrayList;
+import java.util.List;
 
 public class GridListener extends MouseAdapter implements MouseWheelListener {
 
@@ -76,11 +77,11 @@ public class GridListener extends MouseAdapter implements MouseWheelListener {
         int centerY = centerIndex / width;
         int sqrRadius = radius * radius;
 
-        java.util.List<Integer> indices = new ArrayList<>();
+        List<Integer> indices = new ArrayList<>();
 
         for(int extX = -radius; extX <= radius; extX++) {
             for(int extY = -radius; extY <= radius; extY++) {
-                int newX = centerX + extX;
+                int newX = (centerX + extX + width) % width; // Ensure no wrap-around for X
                 int newY = centerY + extY;
 
                 int sqrDst = sqrDistance(centerX, centerY, newX, newY);
@@ -92,10 +93,9 @@ public class GridListener extends MouseAdapter implements MouseWheelListener {
         }
 
         int gridSize = grid.getWidth() * grid.getHeight();
-
         return indices.stream()
                 .mapToInt(Integer::intValue)
-                .filter(value -> value >= 0 && value < gridSize)
+                .filter(value -> 0 <= value && value < gridSize)
                 .toArray();
     }
 
@@ -104,11 +104,11 @@ public class GridListener extends MouseAdapter implements MouseWheelListener {
         int centerX = centerIndex % width;
         int centerY = centerIndex / width;
 
-        java.util.List<Integer> indices = new ArrayList<>();
+        List<Integer> indices = new ArrayList<>();
 
         for(int extX = -radius; extX <= radius; extX++) {
             for(int extY = -radius; extY <= radius; extY++) {
-                int newX = centerX + extX;
+                int newX = (centerX + extX + width) % width; // Ensure no wrap-around for X
                 int newY = centerY + extY;
 
                 int index = newX + newY * width;
@@ -116,7 +116,11 @@ public class GridListener extends MouseAdapter implements MouseWheelListener {
             }
         }
 
-        return indices.stream().mapToInt(Integer::intValue).toArray();
+        int gridSize = grid.getWidth() * grid.getHeight();
+        return indices.stream()
+                .mapToInt(Integer::intValue)
+                .filter(value -> 0 <= value && value < gridSize)
+                .toArray();
     }
 
     private int sqrDistance(int x1, int y1, int x2, int y2) {

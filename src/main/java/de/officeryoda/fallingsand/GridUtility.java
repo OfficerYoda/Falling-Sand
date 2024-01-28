@@ -15,13 +15,7 @@ public class GridUtility {
         IntSummaryStatistics statsX = modifiedIndices.stream().mapToInt(i -> i % width).summaryStatistics();
         IntSummaryStatistics statsY = modifiedIndices.stream().mapToInt(i -> i / width).summaryStatistics();
 
-        int minX = statsX.getMin();
-        int maxX = statsX.getMax();
-        int minY = statsY.getMin();
-        int maxY = statsY.getMax();
-
-        // Create and return the bounding box
-        return new Rectangle(minX, minY, maxX - minX + 1, maxY - minY + 1); // + cellSize/1 to get rid of stray pixels
+        return boundingRectFromStats(statsX, statsY);
     }
 
     public static @NotNull Rectangle calculateBoundingRect(int @NotNull [] modifiedIndices, int width) {
@@ -29,13 +23,7 @@ public class GridUtility {
         IntSummaryStatistics statsX = Arrays.stream(modifiedIndices).map(i -> i % width).summaryStatistics();
         IntSummaryStatistics statsY = Arrays.stream(modifiedIndices).map(i -> i / width).summaryStatistics();
 
-        int minX = statsX.getMin();
-        int maxX = statsX.getMax();
-        int minY = statsY.getMin();
-        int maxY = statsY.getMax();
-
-        // Create and return the bounding box
-        return new Rectangle(minX, minY, maxX - minX + 1, maxY - minY + 1); // + cellSize/1 to get rid of stray pixels
+        return boundingRectFromStats(statsX, statsY);
     }
 
     public static @NotNull Rectangle calculateBoundingRect(Integer[] modifiedIndices, int width) {
@@ -43,13 +31,7 @@ public class GridUtility {
         IntSummaryStatistics statsX = Arrays.stream(modifiedIndices).mapToInt(i -> i % width).summaryStatistics();
         IntSummaryStatistics statsY = Arrays.stream(modifiedIndices).mapToInt(i -> i / width).summaryStatistics();
 
-        int minX = statsX.getMin();
-        int maxX = statsX.getMax();
-        int minY = statsY.getMin();
-        int maxY = statsY.getMax();
-
-        // Create and return the bounding box
-        return new Rectangle(minX, minY, maxX - minX + 1, maxY - minY + 1); // + cellSize/1 to get rid of stray pixels
+        return boundingRectFromStats(statsX, statsY);
     }
 
     @Contract("_, _ -> new")
@@ -64,5 +46,16 @@ public class GridUtility {
 
         // Create and return the bounding rectangle
         return new Rectangle(x, y, width, height);
+    }
+
+    @NotNull
+    private static Rectangle boundingRectFromStats(IntSummaryStatistics statsX, IntSummaryStatistics statsY) {
+        int minX = statsX.getMin();
+        int maxX = statsX.getMax();
+        int minY = statsY.getMin();
+        int maxY = statsY.getMax();
+
+        // Create and return the bounding box
+        return new Rectangle(minX, minY, maxX - minX + 1, maxY - minY + 1);
     }
 }

@@ -183,24 +183,22 @@ class GridPanel extends JPanel {
         Map<Integer, Integer> indexMap = getIndexMap(cursorIndices);
 
         Rectangle rect = GridUtility.calculateBoundingRect(cursorIndices, gridWidth);
-        int maxX = rect.x + rect.width;
-        int maxY = rect.y + rect.height;
 
-        BufferedImage image = new BufferedImage(rect.width * cellSize, rect.height * cellSize, BufferedImage.TYPE_INT_ARGB);
-        Graphics2D g2d = image.createGraphics();
+        BufferedImage image = new BufferedImage(rect.width, rect.height, BufferedImage.TYPE_INT_ARGB);
+        int[] imgColors = new int[rect.width * rect.height];
 
-        for(int x = 0; x < maxX; x++) {
-            for(int y = 0; y < maxY; y++) {
-                int index = x + y * gridWidth;
+        for(int x = 0; x < rect.width; x++) {
+            for(int y = 0; y < rect.height; y++) {
+                int index = (x + rect.x) + (y + rect.y) * gridWidth;
                 int cursorIndex = indexMap.getOrDefault(index, -1);
                 Color color = cursorIndex == -1 ? grid.get(index).getColor() : cursorColors[cursorIndex];
 
-                g2d.setColor(color);
-                g2d.fillRect((x - rect.x) * cellSize, (y - rect.y) * cellSize, cellSize, cellSize);
+                imgColors[x + y * rect.width] = color.getRGB();
             }
         }
 
-        g2d.dispose();
+        image.setRGB(0, 0, rect.width, rect.height, imgColors, 0, rect.width);
+        image = scaleImage(image, cellSize);
 
         g.drawImage(image, rect.x * cellSize, rect.y * cellSize, this);
     }
@@ -232,6 +230,8 @@ class GridPanel extends JPanel {
     }
 
     private @NotNull Map<Integer, Integer> getIndexMap(Integer[] array) {
+        int gridSize = gridWidth * gridHeight;
+
         List<Integer> list = Arrays.stream(array).toList();
         Map<Integer, Integer> map = new HashMap<>();
         for(Integer entry : list) {
@@ -248,8 +248,8 @@ class GridPanel extends JPanel {
 
         // Apply the transformation to the image
         BufferedImage scaledImage = new BufferedImage(
-                gridWidth * scaleFactor,
-                gridHeight * scaleFactor,
+                image.getWidth() * scaleFactor,
+                image.getHeight() * scaleFactor,
                 BufferedImage.TYPE_INT_RGB);
 
         Graphics2D g2d = scaledImage.createGraphics();
