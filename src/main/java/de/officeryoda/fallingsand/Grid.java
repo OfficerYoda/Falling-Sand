@@ -11,6 +11,7 @@ import java.util.List;
 import java.util.Timer;
 import java.util.*;
 import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
 
 public class Grid {
 
@@ -18,8 +19,9 @@ public class Grid {
 
     public static int CURSOR_RADIUS = 8;
 
-    public static int UPDATES_PER_SECOND = 50;
-    public static int UPDATE_INTERVAL = (int) (1f / UPDATES_PER_SECOND * 1000); // time in ms
+    public static final int UPDATES_PER_SECOND = 50;
+    public static final int UPDATE_INTERVAL = (int) (1f / UPDATES_PER_SECOND * 1000); // time in ms
+    private static final int TIMEOUT_TIME_MS = 100;
 
     private final int width;
     private final int height;
@@ -149,21 +151,20 @@ public class Grid {
             // draw cursor
             rect = GridUtility.calculateBoundingRect(cursorIndices, width);
         } else {
-            // add cursorIndices to also draw them
-            List<Integer> intList = Arrays.asList(Arrays.stream(cursorIndices).boxed().toArray(Integer[]::new));
-            modifiedIndices.addAll(intList);
-
+            Rectangle cursorBounds = GridUtility.calculateBoundingRect(cursorIndices, width);
             rect = GridUtility.calculateBoundingRect(modifiedIndices, width);
+            rect = GridUtility.calculateBoundingRect(cursorBounds, rect);
         }
 
         DRAW_FINISHED_LATCH = new CountDownLatch(1);
+
         // to prevent leaving stray pixels
         Rectangle totalRect = GridUtility.calculateBoundingRect(rect, lastUpdateRect);
         gridDrawer.repaintGrid(totalRect);
         lastUpdateRect = rect;
 
         try {
-            DRAW_FINISHED_LATCH.await();
+            DRAW_FINISHED_LATCH.await(TIMEOUT_TIME_MS, TimeUnit.MILLISECONDS);
         } catch(InterruptedException e) {
             throw new RuntimeException(e);
         }
@@ -183,6 +184,7 @@ public class Grid {
     }
 
     public Particle get(int index) {
+        if(index >= gridSize) return ParticleFactory.createParticle(0);
         return this.grid[index];
     }
 

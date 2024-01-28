@@ -55,6 +55,9 @@ public class GridUtility {
         int minY = statsY.getMin();
         int maxY = statsY.getMax();
 
+        if(minX > maxX || minY > maxY) // if min > max, something when wrong
+            return new Rectangle(0, 0, 1, 1);
+
         // Create and return the bounding box
         return new Rectangle(minX, minY, maxX - minX + 1, maxY - minY + 1);
     }

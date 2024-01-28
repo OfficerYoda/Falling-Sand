@@ -13,7 +13,6 @@ import java.util.List;
 
 public class GridListener extends MouseAdapter implements MouseWheelListener {
 
-    public static boolean paintCursor = true;
     private final Grid grid;
     private final int cellSize;
     private final JFrame jFrame;
@@ -68,6 +67,7 @@ public class GridListener extends MouseAdapter implements MouseWheelListener {
         int cursorIndex = x / cellSize + y / cellSize * grid.getWidth();
         int[] cursorIndices = getIndicesInRadius(cursorIndex, Grid.CURSOR_RADIUS);
         grid.setCursorIndices(cursorIndices);
+
         return cursorIndices;
     }
 
@@ -174,17 +174,9 @@ public class GridListener extends MouseAdapter implements MouseWheelListener {
     }
 
     @Override
-    public void mouseClicked(MouseEvent e) {
-        super.mouseClicked(e);
-        if(e.getButton() == MouseEvent.BUTTON2) {
-            paintCursor = !paintCursor;
-        }
-    }
-
-    @Override
     public void mouseWheelMoved(MouseWheelEvent e) {
         super.mouseWheelMoved(e);
-        if(middlePressed) {
+        if(!middlePressed) {
             changeCursorSize(e);
         } else {
             ParticleFactory.nextParticle();

@@ -6,9 +6,7 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.geom.AffineTransform;
 import java.awt.image.BufferedImage;
-import java.util.Arrays;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 public class GridDrawer extends JFrame {
@@ -76,7 +74,7 @@ class GridPanel extends JPanel {
         this.gridWidth = grid.getWidth();
         this.gridHeight = grid.getHeight();
 
-        this.boundsRect = new Rectangle(0, 0, getWidth(), getHeight());
+        this.boundsRect = new Rectangle(0, 0, gridWidth * cellSize, gridHeight * cellSize);
 
         setBackground(Colors.BACKGROUND_COLOR);
     }
@@ -87,76 +85,42 @@ class GridPanel extends JPanel {
 
 //        paintParticles(g);
         paintParticleImage(g);
-        if(GridListener.paintCursor) {
-            paintCursor(g);
-        }
+        paintCursor(g);
 //        paintGrid(g);
 //        paintFps(g);
-
         Grid.DRAW_FINISHED_LATCH.countDown();
     }
 
     private void paintParticleImage(Graphics g) {
-        int[] colors = Arrays.stream(grid.getGrid()).mapToInt(particle -> particle.getColor().getRGB()).toArray();
-        BufferedImage image = new BufferedImage(gridWidth, gridHeight, BufferedImage.TYPE_INT_RGB);
-        image.setRGB(0, 0, gridWidth, gridHeight, colors, 0, gridWidth);
-
-        BufferedImage scaledImage = scaleImage(image, cellSize);
-
-        // Draw the scaled image onto the panel
-        g.drawImage(scaledImage, 0, 0, this);
-    }
-
-    private void paintGrid(Graphics g) {
-        final int minX = 0;
-        final int maxX = gridWidth * cellSize;
-        final int minY = 0;
-        final int maxY = gridHeight * cellSize;
-
-        // Draw horizontal lines
-        for(int y = 0; y <= gridHeight; y++) {
-            g.drawLine(
-                    minX, y * cellSize,
-                    maxX, y * cellSize);
-        }
-
-        // Draw vertical lines
-        for(int x = 0; x <= gridWidth; x++) {
-            g.drawLine(
-                    x * cellSize, minY,
-                    x * cellSize, maxY);
-        }
-    }
-
-    private void paintParticles(Graphics g) {
         if(grid.isCleared()) {
-            clearPixels(g);
-        } else if(!grid.getModifiedIndices().isEmpty()) {
-            paintPixels(g);
+            paintClearedGrid(g);
+            return;
         }
-    }
+        BufferedImage image = new BufferedImage(boundsRect.width, boundsRect.height, BufferedImage.TYPE_INT_RGB);
+        int[] imgColors = new int[boundsRect.width * boundsRect.height + 1];
 
-    private void paintPixels(Graphics g) {
-        int maxX = boundsRect.x + boundsRect.width;
-        int maxY = boundsRect.y + boundsRect.height;
-
-        for(int x = boundsRect.x; x < maxX; x++) {
-            for(int y = boundsRect.y; y < maxY; y++) {
-                int index = x + y * gridWidth;
-
+        for(int x = 0; x < boundsRect.width; x++) {
+            for(int y = 0; y < boundsRect.height; y++) {
+                int index = (x + boundsRect.x) + (y + boundsRect.y) * gridWidth;
                 Color color = grid.get(index).getColor();
-                paintPixel(x, y, color, g);
+
+                imgColors[x + y * boundsRect.width] = color.getRGB();
             }
         }
+
+        image.setRGB(0, 0, boundsRect.width, boundsRect.height, imgColors, 0, boundsRect.width);
+        image = scaleImage(image, cellSize);
+
+        g.drawImage(image, boundsRect.x * cellSize, boundsRect.y * cellSize, this);
     }
 
-    private void clearPixels(Graphics g) {
+    private void paintClearedGrid(Graphics g) {
         g.setColor(Colors.BACKGROUND_COLOR);
         g.fillRect(0, 0, getWidth(), getHeight());
     }
 
     private void paintCursor(Graphics g) {
-        Integer[] cursorIndices = Arrays.stream(grid.getCursorIndices()).boxed().toArray(Integer[]::new);
+        int[] cursorIndices = grid.getCursorIndices();
         if(cursorIndices.length == 0) return;
 
         Color[] cursorColors = grid.getCursorColors();
@@ -171,9 +135,9 @@ class GridPanel extends JPanel {
             for(int y = 0; y < rect.height; y++) {
                 int index = (x + rect.x) + (y + rect.y) * gridWidth;
                 int cursorIndex = indexMap.getOrDefault(index, -1);
-                Color color = cursorIndex == -1 ? grid.get(index).getColor() : cursorColors[cursorIndex];
+                int color = (cursorIndex == -1 ? grid.get(index).getColor() : cursorColors[cursorIndex]).getRGB();
 
-                imgColors[x + y * rect.width] = color.getRGB();
+                imgColors[x + y * rect.width] = color;
             }
         }
 
@@ -207,13 +171,10 @@ class GridPanel extends JPanel {
         g.drawString("FPS: " + fps, 5, GridDrawer.TITLE_BAR_HEIGHT);
     }
 
-    private @NotNull Map<Integer, Integer> getIndexMap(Integer[] array) {
-        int gridSize = gridWidth * gridHeight;
-
-        List<Integer> list = Arrays.stream(array).toList();
+    private @NotNull Map<Integer, Integer> getIndexMap(int[] array) {
         Map<Integer, Integer> map = new HashMap<>();
-        for(Integer entry : list) {
-            map.put(entry, list.indexOf(entry));
+        for(int i = 0; i < array.length; i++) {
+            map.put(array[i], i);
         }
         return map;
     }
