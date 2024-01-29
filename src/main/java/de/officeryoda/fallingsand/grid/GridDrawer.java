@@ -1,5 +1,6 @@
-package de.officeryoda.fallingsand;
+package de.officeryoda.fallingsand.grid;
 
+import de.officeryoda.fallingsand.Colors;
 import org.jetbrains.annotations.NotNull;
 
 import javax.swing.*;
@@ -200,7 +201,15 @@ class GridPanel extends JPanel {
         return scaledImage;
     }
 
-    void setBoundsRect(Rectangle boundsRect) {
+    public Rectangle adjustToGridDimensions(Rectangle rect) {
+        int newWidth = Math.min(rect.width, gridWidth);
+        int newHeight = Math.min(rect.height, gridHeight);
+
+        return new Rectangle(rect.x, rect.y, newWidth, newHeight);
+    }
+
+    public void setBoundsRect(Rectangle boundsRect) {
+        boundsRect = adjustToGridDimensions(boundsRect);
         this.boundsRect = boundsRect;
     }
 }

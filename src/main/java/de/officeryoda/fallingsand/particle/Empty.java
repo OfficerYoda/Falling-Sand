@@ -1,11 +1,11 @@
 package de.officeryoda.fallingsand.particle;
 
 import de.officeryoda.fallingsand.Colors;
-
-import java.awt.*;
+import de.officeryoda.fallingsand.grid.Grid;
+import de.officeryoda.fallingsand.particle.behavior.Behavior;
 
 public class Empty extends Particle {
-    public Empty() {
-        super(Colors.BACKGROUND_COLOR, Colors.BACKGROUND_COLOR, true, 0, 0);
+    public Empty(Grid grid, int index) {
+        super(Colors.BACKGROUND_COLOR, Colors.BACKGROUND_COLOR, true, new Behavior[0], grid, index);
     }
 }

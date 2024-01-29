@@ -1,6 +1,7 @@
 package de.officeryoda.fallingsand.particle;
 
-import de.officeryoda.fallingsand.Colors;
+import de.officeryoda.fallingsand.grid.Grid;
+import de.officeryoda.fallingsand.particle.behavior.Behavior;
 
 import java.awt.*;
 
@@ -9,35 +10,23 @@ public abstract class Particle {
     protected Color baseColor;
     protected Color color;
     protected boolean isEmpty;
-    protected double velocity;
-    protected double maxVelocity;
-    protected double acceleration;
+    protected Behavior[] behaviors;
+    protected Grid grid;
+    protected int index;
 
-    protected Particle(Color baseColor, Color color, boolean isEmpty, double maxVelocity, double acceleration) {
+    protected Particle(Color baseColor, Color color, boolean isEmpty, Behavior[] behaviors, Grid grid, int index) {
         this.baseColor = baseColor;
         this.color = color;
         this.isEmpty = isEmpty;
-        this.velocity = 0;
-        this.maxVelocity = maxVelocity;
-        this.acceleration = acceleration;
+        this.behaviors = behaviors;
+        this.grid = grid;
+        this.index = index;
     }
 
-    public void updateVelocity() {
-        velocity += acceleration;
-
-        velocity = Math.clamp(velocity, -maxVelocity, maxVelocity);
-    }
-
-    public void resetVelocity() {
-        this.velocity = 0;
-    }
-
-    public int getUpdateCount() {
-        double abs = Math.abs(this.velocity);
-        double floored = Math.floor(abs);
-        double mod = abs - floored;
-        // Treat a remainder (e.g. 0.5) as a random chance to update
-        return (int) (floored + (Math.random() < mod ? 1 : 0));
+    public void update() {
+        for(Behavior behavior : behaviors) {
+            behavior.update(this, grid);
+        }
     }
 
     public Color getColor() {
@@ -50,5 +39,13 @@ public abstract class Particle {
 
     public Color getBaseColor() {
         return this.baseColor;
+    }
+
+    public int getIndex() {
+        return index;
+    }
+
+    public void setIndex(int index) {
+        this.index = index;
     }
 }

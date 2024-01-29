@@ -1,5 +1,6 @@
-package de.officeryoda.fallingsand;
+package de.officeryoda.fallingsand.grid;
 
+import de.officeryoda.fallingsand.Colors;
 import de.officeryoda.fallingsand.particle.Empty;
 import de.officeryoda.fallingsand.particle.Particle;
 import de.officeryoda.fallingsand.particle.ParticleFactory;
@@ -7,7 +8,6 @@ import org.jetbrains.annotations.NotNull;
 
 import javax.swing.*;
 import java.awt.*;
-import java.util.List;
 import java.util.Timer;
 import java.util.*;
 import java.util.concurrent.CountDownLatch;
@@ -15,14 +15,11 @@ import java.util.concurrent.TimeUnit;
 
 public class Grid {
 
-    public static CountDownLatch DRAW_FINISHED_LATCH = new CountDownLatch(1);
-
-    public static int CURSOR_RADIUS = 8;
-
     public static final int UPDATES_PER_SECOND = 50;
     public static final int UPDATE_INTERVAL = (int) (1f / UPDATES_PER_SECOND * 1000); // time in ms
     private static final int TIMEOUT_TIME_MS = 100;
-
+    public static CountDownLatch DRAW_FINISHED_LATCH = new CountDownLatch(1);
+    public static int CURSOR_RADIUS = 8;
     private final int width;
     private final int height;
     private final int gridSize;
@@ -93,27 +90,18 @@ public class Grid {
 
     private void updateParticles() {
         // backward to not double apply gravity to a particle
-        for(int row = height - 1; row >= 0; row--) {
-            int rowOffset = row * this.width;
-            boolean leftToRight = Math.random() > 0.5;
-            for(int col = 0; col < this.width; col++) {
+        for(int row = this.height - 1; row >= 0; row--) {
+            var rowOffset = row * this.width;
+            var leftToRight = Math.random() > 0.5;
+            for(var i = 0; i < this.width; i++) {
                 // Go from right to left or left to right depending on our random value
-                int columnOffset = leftToRight ? col : -col - 1 + this.width;
+                int columnOffset = leftToRight ? i : -i + this.width - 1;
                 int index = rowOffset + columnOffset;
 
-                Particle particle = grid[index];
-                particle.updateVelocity();
-                for(int j = 0; j < particle.getUpdateCount(); j++) {
-                    int newIdx = updatePixel(index);
+//                index = this.modifyIndexHook(index, params); // TO-DO uncomment commented code when implemented
+                Particle particle = this.grid[index];
 
-                    // stop the particle if the newIndex bottom or bottomR exceeds the boundary (gridSize - width - 1)
-                    if(newIdx == index || newIdx > gridSize - width) {
-                        particle.resetVelocity();
-                        break;
-                    } else {
-                        index = newIdx;
-                    }
-                }
+                particle.update();
             }
         }
     }
@@ -171,8 +159,7 @@ public class Grid {
     }
 
     public void clear() {
-        Empty empty = new Empty();
-        Arrays.fill(grid, empty);
+        Arrays.setAll(grid, index -> new Empty(this, index));
         cleared = true;
     }
 
@@ -184,16 +171,22 @@ public class Grid {
     }
 
     public Particle get(int index) {
-        if(index >= gridSize) return ParticleFactory.createParticle(0);
+        if(index < 0 || gridSize <= index) return new Empty(this, index);
         return this.grid[index];
     }
 
     public void swap(int indexA, int indexB) {
         if(this.grid[indexA].isEmpty() && this.grid[indexB].isEmpty()) return;
-
         Particle temp = this.grid[indexA];
-        this.set(indexA, this.grid[indexB]);
-        this.set(indexB, temp);
+        this.grid[indexA] = this.grid[indexB];
+        this.setIndex(this.grid[indexB], indexA);
+        this.setIndex(temp, indexB);
+    }
+
+    private void setIndex(Particle particle, int index) {
+        this.grid[index] = particle;
+        particle.setIndex(index);
+        this.modifiedIndices.add(index);
     }
 
     public boolean isEmpty(int index) {
@@ -205,11 +198,15 @@ public class Grid {
         cursorColors = new Color[cursorIndices.length];
         if(cursorIndices.length == 0) return; // needs testing
 
-        Particle particle = ParticleFactory.createParticle();
+        Particle particle = ParticleFactory.createDummyParticle();
         Color color = particle.getBaseColor();
         for(int i = 0; i < cursorIndices.length; i++) {
             cursorColors[i] = particle.isEmpty() ? color : Colors.varyColor(color);
         }
+    }
+
+    public void onModified(int index) {
+        this.modifiedIndices.add(index);
     }
 
     /// Getters and Setters
@@ -255,6 +252,10 @@ public class Grid {
     }
 
     public Particle[] getGrid() {
-        return grid;
+        return this.grid;
+    }
+
+    public int getGridSize() {
+        return this.gridSize;
     }
 }

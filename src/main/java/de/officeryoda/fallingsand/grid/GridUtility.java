@@ -1,4 +1,4 @@
-package de.officeryoda.fallingsand;
+package de.officeryoda.fallingsand.grid;
 
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;

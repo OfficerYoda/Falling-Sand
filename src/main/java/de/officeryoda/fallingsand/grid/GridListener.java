@@ -1,4 +1,4 @@
-package de.officeryoda.fallingsand;
+package de.officeryoda.fallingsand.grid;
 
 import de.officeryoda.fallingsand.particle.ParticleFactory;
 
@@ -42,7 +42,7 @@ public class GridListener extends MouseAdapter implements MouseWheelListener {
         for(int index : cursorIndices) {
             if(index < 0) continue;
             if(Math.random() < 0.5) {
-                grid.set(index, ParticleFactory.createParticle());
+                grid.set(index, ParticleFactory.createParticle(grid, index));
             }
         }
     }
@@ -85,7 +85,7 @@ public class GridListener extends MouseAdapter implements MouseWheelListener {
                 int newY = centerY + extY;
 
                 int sqrDst = sqrDistance(centerX, centerY, newX, newY);
-                if(sqrDst <= sqrRadius) {
+                if(sqrDst < sqrRadius) {
                     int index = newX + newY * width;
                     indices.add(index);
                 }

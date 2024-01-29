@@ -1,5 +1,7 @@
 package de.officeryoda.fallingsand.particle;
 
+import de.officeryoda.fallingsand.grid.Grid;
+
 import java.util.HashMap;
 import java.util.Map;
 
@@ -14,20 +16,20 @@ public class ParticleFactory {
         particleMap.put(2, Wood.class);
     }
 
-    public static Particle createParticle() {
-        return createParticle(selectedParticle);
-    }
-
-    public static Particle createParticle(int id) {
-        Class<? extends Particle> particleClass = particleMap.get(id);
+    public static Particle createParticle(Grid grid, int index) {
+        Class<? extends Particle> particleClass = particleMap.get(selectedParticle);
         if (particleClass != null) {
             try {
-                return particleClass.getDeclaredConstructor().newInstance();
+                return particleClass.getDeclaredConstructor(Grid.class, int.class).newInstance(grid, index);
             } catch (Exception e) {
                 e.printStackTrace();
             }
         }
-        throw new IllegalArgumentException("Invalid particle ID: " + id);
+        throw new IllegalArgumentException("Invalid particle ID: " + selectedParticle);
+    }
+
+    public static Particle createDummyParticle() {
+        return createParticle(null, -1);
     }
 
     public static void nextParticle() {
