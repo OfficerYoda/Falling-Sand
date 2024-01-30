@@ -11,9 +11,11 @@ public class ParticleFactory {
     private static int selectedParticle = 1; // default: Sand
 
     static {
-        particleMap.put(0, Empty.class);
-        particleMap.put(1, Sand.class);
-        particleMap.put(2, Wood.class);
+        particleMap.put(-1, OutOfBoundsParticle.class);
+        particleMap.put(0, EmptyParticle.class);
+        particleMap.put(1, SandParticle.class);
+        particleMap.put(2, WoodParticle.class);
+        particleMap.put(3, SmokeParticle.class);
     }
 
     public static Particle createParticle(Grid grid, int index) {

@@ -1,7 +1,8 @@
 package de.officeryoda.fallingsand.grid;
 
 import de.officeryoda.fallingsand.Colors;
-import de.officeryoda.fallingsand.particle.Empty;
+import de.officeryoda.fallingsand.particle.EmptyParticle;
+import de.officeryoda.fallingsand.particle.OutOfBoundsParticle;
 import de.officeryoda.fallingsand.particle.Particle;
 import de.officeryoda.fallingsand.particle.ParticleFactory;
 import org.jetbrains.annotations.NotNull;
@@ -18,8 +19,10 @@ public class Grid {
     public static final int UPDATES_PER_SECOND = 50;
     public static final int UPDATE_INTERVAL = (int) (1f / UPDATES_PER_SECOND * 1000); // time in ms
     private static final int TIMEOUT_TIME_MS = 100;
+
     public static CountDownLatch DRAW_FINISHED_LATCH = new CountDownLatch(1);
-    public static int CURSOR_RADIUS = 8;
+    public static int CURSOR_RADIUS = 5;
+
     private final int width;
     private final int height;
     private final int gridSize;
@@ -159,7 +162,7 @@ public class Grid {
     }
 
     public void clear() {
-        Arrays.setAll(grid, index -> new Empty(this, index));
+        Arrays.setAll(grid, index -> new EmptyParticle(this, index));
         cleared = true;
     }
 
@@ -171,7 +174,7 @@ public class Grid {
     }
 
     public Particle get(int index) {
-        if(index < 0 || gridSize <= index) return new Empty(this, index);
+        if(index < 0 || gridSize <= index) return new OutOfBoundsParticle();
         return this.grid[index];
     }
 

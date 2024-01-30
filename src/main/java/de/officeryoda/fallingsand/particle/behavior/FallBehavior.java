@@ -135,16 +135,9 @@ public class FallBehavior extends Behavior {
         int gridWidth = grid.getWidth();
 
         double nextDelta = Math.signum(this.velocity) * gridWidth;
-
-        int row = i / gridWidth;
-        // if error occur because the index is negative, change the 'row < 0' to a 'row < 1' (only if the particles move up)
-        if(row < 0 || grid.getHeight() - 1 <= row)
-            return new MovesResult(new ArrayList<>(), new ArrayList<>());
-
         int nextVertical = i + (int) nextDelta;
         int nextVerticalLeft = nextVertical - 1;
         int nextVerticalRight = nextVertical + 1;
-
         int column = nextVertical % gridWidth;
 
         List<Integer> moves = new ArrayList<>();
