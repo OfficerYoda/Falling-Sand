@@ -85,13 +85,17 @@ public class Grid {
 
         gridListener.spawn();
 
-        updateParticles();
+        // A pass for positive y direction velocities,
+        // and negative
+        for(int pass = -1; pass <= 1; pass += 2) {
+            updateParticles(pass);
+        }
         repaintGrid();
 
         lastUpdate = System.currentTimeMillis();
     }
 
-    private void updateParticles() {
+    private void updateParticles(int direction) {
         // backward to not double apply gravity to a particle
         for(int row = this.height - 1; row >= 0; row--) {
             var rowOffset = row * this.width;
@@ -101,36 +105,12 @@ public class Grid {
                 int columnOffset = leftToRight ? i : -i + this.width - 1;
                 int index = rowOffset + columnOffset;
 
-//                index = this.modifyIndexHook(index, params); // TO-DO uncomment commented code when implemented
+                index = this.modifyIndexHook(index, direction); // TO-DO uncomment commented code when implemented
                 Particle particle = this.grid[index];
 
-                particle.update();
+                particle.update(direction);
             }
         }
-    }
-
-    private int updatePixel(int i) {
-        if(isEmpty(i)) return i;
-
-        // Get the indices of the pixels directly below
-        int below = i + width;
-        int belowA = below - 1;
-        int belowB = below + 1;
-        int column = i % this.width;
-
-        // If there are no pixels below, including diagonals, move it accordingly.
-        if(isEmpty(below)) {
-            swap(i, below);
-            return below;
-        } else if(this.isEmpty(belowA) && belowA % this.width < column) { // Check to make sure belowLeft didn't wrap to the next line
-            this.swap(i, belowA);
-            return belowA;
-        } else if(this.isEmpty(belowB) && belowB % this.width > column) { // Check to make sure belowRight didn't wrap to the next line
-            this.swap(i, belowB);
-            return belowB;
-        }
-
-        return i;
     }
 
     private void repaintGrid() {
@@ -159,6 +139,13 @@ public class Grid {
         } catch(InterruptedException e) {
             throw new RuntimeException(e);
         }
+    }
+
+    private int modifyIndexHook(int index, int direction) {
+        if (direction == -1) {
+            return this.grid.length - index - 1;
+        }
+        return index;
     }
 
     public void clear() {

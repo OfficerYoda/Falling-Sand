@@ -23,9 +23,9 @@ public abstract class Particle {
         this.index = index;
     }
 
-    public void update() {
+    public void update(int direction) {
         for(Behavior behavior : behaviors) {
-            behavior.update(this, grid);
+            behavior.update(this, grid, direction);
         }
     }
 

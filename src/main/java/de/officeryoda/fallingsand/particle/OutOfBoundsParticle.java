@@ -8,6 +8,8 @@ import java.awt.*;
 public class OutOfBoundsParticle extends Particle{
 
     public OutOfBoundsParticle() {
-        super(Color.pink, Color.pink, false, new Behavior[]{}, null, -1);
+        super(Color.pink, Color.pink,
+                false, new Behavior[]{},
+                null, -1);
     }
 }

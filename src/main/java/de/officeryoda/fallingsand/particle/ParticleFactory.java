@@ -11,7 +11,6 @@ public class ParticleFactory {
     private static int selectedParticle = 1; // default: Sand
 
     static {
-        particleMap.put(-1, OutOfBoundsParticle.class);
         particleMap.put(0, EmptyParticle.class);
         particleMap.put(1, SandParticle.class);
         particleMap.put(2, WoodParticle.class);

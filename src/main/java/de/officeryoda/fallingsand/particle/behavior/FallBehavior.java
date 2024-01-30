@@ -12,15 +12,15 @@ public class FallBehavior extends Behavior {
     private final double acceleration;
     private double velocity;
 
-    // Constructor for initializing maxSpeed, acceleration, and velocity
     public FallBehavior(double acceleration, double maxSpeed) {
         this.maxSpeed = maxSpeed;
         this.velocity = 0;
         this.acceleration = acceleration;
     }
 
-    // Update the particle's position in the grid based on behavior
-    public void update(Particle particle, Grid grid) {
+    public void update(Particle particle, Grid grid, int direction) {
+        if(!shouldUpdate(direction)) return;
+
         int index = particle.getIndex();
 
         updateVelocity();
@@ -51,7 +51,6 @@ public class FallBehavior extends Behavior {
         }
     }
 
-    // Perform a step of the behavior, updating particle position in the grid
     private void step(Particle particle, Grid grid) {
         int i = particle.getIndex();
         if(grid.isEmpty(i)) { // OPT could be replaced with 'particle.isEmpty()' but leaving it in for now
@@ -72,7 +71,10 @@ public class FallBehavior extends Behavior {
         grid.swap(i, choice);
     }
 
-    // Choose an element from an array based on weights
+    private boolean shouldUpdate(int direction) {
+        return direction == Math.signum(this.nextVelocity());
+    }
+
     private int choose(List<Integer> moves, List<Integer> weights) {
         if(moves.size() != weights.size()) {
             throw new IllegalArgumentException("Array and weights must be the same length");
@@ -92,17 +94,14 @@ public class FallBehavior extends Behavior {
         throw new IllegalStateException("Shouldn't get here.");
     }
 
-    // Reset velocity to 0
     private void resetVelocity() {
         this.velocity = 0;
     }
 
-    // Update velocity based on acceleration and maxSpeed constraints
     private void updateVelocity() {
         this.velocity = nextVelocity();
     }
 
-    // Calculate the next velocity considering acceleration and maxSpeed constraints
     private double nextVelocity() {
         if(this.velocity >= maxSpeed) {
             return maxSpeed;
@@ -115,7 +114,6 @@ public class FallBehavior extends Behavior {
         return newVelocity;
     }
 
-    // Calculate the number of updates based on the current velocity
     private int getUpdateCount() {
         double abs = Math.abs(this.velocity);
         int floored = (int) abs;
@@ -125,12 +123,10 @@ public class FallBehavior extends Behavior {
         return floored + (Math.random() < remainder ? 1 : 0);
     }
 
-    // Check if a particle can pass through based on its properties
     private boolean canPassThrough(Particle particle) {
         return particle.isEmpty()/* || particle.isAiry()*/; // TO-DO uncomment the commented code when implemented
     }
 
-    // Calculate possible moves and their weights based on grid and current position
     private MovesResult possibleMoves(Grid grid, int i) {
         int gridWidth = grid.getWidth();
 
@@ -163,7 +159,6 @@ public class FallBehavior extends Behavior {
         return new MovesResult(moves, weights);
     }
 
-    // record representing the result of possible moves and their weights
     private record MovesResult(List<Integer> moves, List<Integer> weights) {
     }
 }

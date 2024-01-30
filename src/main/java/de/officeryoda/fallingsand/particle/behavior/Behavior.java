@@ -5,5 +5,5 @@ import de.officeryoda.fallingsand.particle.Particle;
 
 public abstract class Behavior {
 
-    public abstract void update(Particle particle, Grid grid);
+    public abstract void update(Particle particle, Grid grid, int direction);
 }
