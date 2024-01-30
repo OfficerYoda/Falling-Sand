@@ -8,7 +8,7 @@ public class WoodParticle extends Particle {
 
     public WoodParticle(Grid grid, int index) {
         super(Colors.WOOD_COLOR, Colors.varyColor(Colors.WOOD_COLOR),
-                false, new Behavior[]{},
+                new Behavior[]{},
                 grid, index);
     }
 }

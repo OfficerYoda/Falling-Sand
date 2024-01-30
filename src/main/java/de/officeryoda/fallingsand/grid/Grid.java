@@ -105,7 +105,7 @@ public class Grid {
                 int columnOffset = leftToRight ? i : -i + this.width - 1;
                 int index = rowOffset + columnOffset;
 
-                index = this.modifyIndexHook(index, direction); // TO-DO uncomment commented code when implemented
+                index = this.modifyIndexHook(index, direction);
                 Particle particle = this.grid[index];
 
                 particle.update(direction);
@@ -142,7 +142,7 @@ public class Grid {
     }
 
     private int modifyIndexHook(int index, int direction) {
-        if (direction == -1) {
+        if(direction == -1) {
             return this.grid.length - index - 1;
         }
         return index;
@@ -189,9 +189,18 @@ public class Grid {
         if(cursorIndices.length == 0) return; // needs testing
 
         Particle particle = ParticleFactory.createDummyParticle();
-        Color color = particle.getBaseColor();
+        Color baseColor = particle.getBaseColor();
         for(int i = 0; i < cursorIndices.length; i++) {
-            cursorColors[i] = particle.isEmpty() ? color : Colors.varyColor(color);
+            Color color;
+            if(particle.isEmpty()) { // Empty particle
+                color = baseColor;
+            } else if(particle.isAiry()) { // Smoke Particle
+                color = Colors.varyColor(baseColor, -0.05, 0.05, -0.05);
+            } else {
+                color = Colors.varyColor(baseColor);
+            }
+
+            cursorColors[i] = color;
         }
     }
 

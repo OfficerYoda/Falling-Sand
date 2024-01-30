@@ -6,13 +6,13 @@ import de.officeryoda.fallingsand.particle.Particle;
 import java.util.ArrayList;
 import java.util.List;
 
-public class FallBehavior extends Behavior {
+public class MovesBehavior extends Behavior {
 
     private final double maxSpeed;
     private final double acceleration;
     private double velocity;
 
-    public FallBehavior(double acceleration, double maxSpeed) {
+    public MovesBehavior(double acceleration, double maxSpeed) {
         this.maxSpeed = maxSpeed;
         this.velocity = 0;
         this.acceleration = acceleration;
@@ -51,7 +51,7 @@ public class FallBehavior extends Behavior {
         }
     }
 
-    private void step(Particle particle, Grid grid) {
+    protected void step(Particle particle, Grid grid) {
         int i = particle.getIndex();
         if(grid.isEmpty(i)) { // OPT could be replaced with 'particle.isEmpty()' but leaving it in for now
             resetVelocity();
@@ -70,12 +70,7 @@ public class FallBehavior extends Behavior {
         int choice = choose(moves, weights);
         grid.swap(i, choice);
     }
-
-    private boolean shouldUpdate(int direction) {
-        return direction == Math.signum(this.nextVelocity());
-    }
-
-    private int choose(List<Integer> moves, List<Integer> weights) {
+    protected int choose(List<Integer> moves, List<Integer> weights) {
         if(moves.size() != weights.size()) {
             throw new IllegalArgumentException("Array and weights must be the same length");
         }
@@ -94,15 +89,15 @@ public class FallBehavior extends Behavior {
         throw new IllegalStateException("Shouldn't get here.");
     }
 
-    private void resetVelocity() {
+    protected void resetVelocity() {
         this.velocity = 0;
     }
 
-    private void updateVelocity() {
+    protected void updateVelocity() {
         this.velocity = nextVelocity();
     }
 
-    private double nextVelocity() {
+    protected double nextVelocity() {
         if(this.velocity >= maxSpeed) {
             return maxSpeed;
         }
@@ -114,7 +109,7 @@ public class FallBehavior extends Behavior {
         return newVelocity;
     }
 
-    private int getUpdateCount() {
+    protected int getUpdateCount() {
         double abs = Math.abs(this.velocity);
         int floored = (int) abs;
         double remainder = abs - floored;
@@ -123,11 +118,15 @@ public class FallBehavior extends Behavior {
         return floored + (Math.random() < remainder ? 1 : 0);
     }
 
-    private boolean canPassThrough(Particle particle) {
-        return particle.isEmpty()/* || particle.isAiry()*/; // TO-DO uncomment the commented code when implemented
+    protected boolean shouldUpdate(int direction) {
+        return direction == Math.signum(this.nextVelocity());
     }
 
-    private MovesResult possibleMoves(Grid grid, int i) {
+    protected boolean canPassThrough(Particle particle) {
+        return particle.isEmpty() || particle.isAiry();
+    }
+
+    protected MovesResult possibleMoves(Grid grid, int i) {
         int gridWidth = grid.getWidth();
 
         double nextDelta = Math.signum(this.velocity) * gridWidth;
@@ -159,6 +158,6 @@ public class FallBehavior extends Behavior {
         return new MovesResult(moves, weights);
     }
 
-    private record MovesResult(List<Integer> moves, List<Integer> weights) {
+    protected record MovesResult(List<Integer> moves, List<Integer> weights) {
     }
 }

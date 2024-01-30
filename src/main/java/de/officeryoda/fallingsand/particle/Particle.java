@@ -9,18 +9,29 @@ public abstract class Particle {
 
     protected Color baseColor;
     protected Color color;
-    protected boolean isEmpty;
     protected Behavior[] behaviors;
     protected Grid grid;
     protected int index;
 
-    protected Particle(Color baseColor, Color color, boolean isEmpty, Behavior[] behaviors, Grid grid, int index) {
+    protected boolean isEmpty;
+    protected boolean isAiry;
+
+    protected Particle(Color baseColor, Color color, Behavior[] behaviors, Grid grid, int index, boolean isEmpty, boolean isAiry) {
         this.baseColor = baseColor;
         this.color = color;
-        this.isEmpty = isEmpty;
         this.behaviors = behaviors;
         this.grid = grid;
         this.index = index;
+        this.isEmpty = isEmpty;
+        this.isAiry = isAiry;
+    }
+
+    protected Particle(Color baseColor, Color color, Behavior[] behaviors, Grid grid, int index, boolean isEmpty) {
+        this(baseColor, color, behaviors, grid, index, isEmpty, false);
+    }
+
+    protected Particle(Color baseColor, Color color, Behavior[] behaviors, Grid grid, int index) {
+        this(baseColor, color, behaviors, grid, index, false, false);
     }
 
     public void update(int direction) {
@@ -33,10 +44,6 @@ public abstract class Particle {
         return this.color;
     }
 
-    public boolean isEmpty() {
-        return this.isEmpty;
-    }
-
     public Color getBaseColor() {
         return this.baseColor;
     }
@@ -47,5 +54,13 @@ public abstract class Particle {
 
     public void setIndex(int index) {
         this.index = index;
+    }
+
+    public boolean isEmpty() {
+        return this.isEmpty;
+    }
+
+    public boolean isAiry() {
+        return this.isAiry;
     }
 }
