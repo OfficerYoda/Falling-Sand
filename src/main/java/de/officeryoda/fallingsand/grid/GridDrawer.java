@@ -97,7 +97,7 @@ class GridPanel extends JPanel {
             paintClearedGrid(g);
             return;
         }
-        BufferedImage image = new BufferedImage(boundsRect.width, boundsRect.height, BufferedImage.TYPE_INT_RGB);
+        BufferedImage image = new BufferedImage(boundsRect.width, boundsRect.height, BufferedImage.TYPE_INT_ARGB);
         int[] imgColors = new int[boundsRect.width * boundsRect.height + 1];
 
         for(int x = 0; x < boundsRect.width; x++) {
@@ -190,7 +190,7 @@ class GridPanel extends JPanel {
         BufferedImage scaledImage = new BufferedImage(
                 image.getWidth() * scaleFactor,
                 image.getHeight() * scaleFactor,
-                BufferedImage.TYPE_INT_RGB);
+                BufferedImage.TYPE_INT_ARGB);
 
         Graphics2D g2d = scaledImage.createGraphics();
         g2d.setTransform(transform);

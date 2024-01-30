@@ -18,6 +18,7 @@ public class MovesBehavior extends Behavior {
         this.acceleration = acceleration;
     }
 
+    @Override
     public void update(Particle particle, Grid grid, int direction) {
         if(!shouldUpdate(direction)) return;
 
@@ -70,6 +71,7 @@ public class MovesBehavior extends Behavior {
         int choice = choose(moves, weights);
         grid.swap(i, choice);
     }
+
     protected int choose(List<Integer> moves, List<Integer> weights) {
         if(moves.size() != weights.size()) {
             throw new IllegalArgumentException("Array and weights must be the same length");

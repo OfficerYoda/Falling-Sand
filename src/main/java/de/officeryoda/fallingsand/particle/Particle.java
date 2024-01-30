@@ -41,7 +41,11 @@ public abstract class Particle {
     }
 
     public Color getColor() {
-        return this.color;
+        return color;
+    }
+
+    public void setColor(Color color) {
+        this.color = color;
     }
 
     public Color getBaseColor() {

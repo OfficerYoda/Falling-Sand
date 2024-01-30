@@ -204,6 +204,10 @@ public class Grid {
         }
     }
 
+    public void clearIndex(int index) {
+        this.set(index, new EmptyParticle(this, index));
+    }
+
     public void onModified(int index) {
         this.modifiedIndices.add(index);
     }
@@ -242,19 +246,11 @@ public class Grid {
         return this.cleared;
     }
 
-    public synchronized Set<Integer> getModifiedIndices() {
-        return this.modifiedIndices;
-    }
-
     public void setGridListener(GridListener gridListener) {
         this.gridListener = gridListener;
     }
 
     public Particle[] getGrid() {
         return this.grid;
-    }
-
-    public int getGridSize() {
-        return this.gridSize;
     }
 }
