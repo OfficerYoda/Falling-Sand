@@ -14,8 +14,7 @@ public class ParticleFactory {
         particleMap.put(0, EmptyParticle.class);
         particleMap.put(1, SandParticle.class);
         particleMap.put(2, WoodParticle.class);
-        particleMap.put(3, SmokeParticle.class);
-        particleMap.put(4, FireParticle.class);
+        particleMap.put(3, FireParticle.class);
     }
 
     public static Particle createParticle(Grid grid, int index) {
