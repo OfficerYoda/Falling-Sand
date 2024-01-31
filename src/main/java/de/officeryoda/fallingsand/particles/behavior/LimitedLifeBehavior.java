@@ -4,14 +4,17 @@ import de.officeryoda.fallingsand.grid.Grid;
 import de.officeryoda.fallingsand.interfaces.LimitedLifeExecutor;
 import de.officeryoda.fallingsand.interfaces.TriConsumer;
 import de.officeryoda.fallingsand.particles.Particle;
+import lombok.Getter;
 
 import java.util.function.BiConsumer;
 
 public class LimitedLifeBehavior extends Behavior {
 
+    @Getter
     private final int lifetime;
     private final BiConsumer<LimitedLifeBehavior, Particle> onTick;
     private final TriConsumer<LimitedLifeBehavior, Particle, Grid> onDeath;
+    @Getter
     private int remainingLife;
 
     public LimitedLifeBehavior(int lifetime, LimitedLifeExecutor lifeExecutor) {
@@ -36,14 +39,6 @@ public class LimitedLifeBehavior extends Behavior {
 
         onTick.accept(this, particle);
         grid.onModified(particle.getIndex());
-    }
-
-    public int getLifetime() {
-        return this.lifetime;
-    }
-
-    public int getRemainingLife() {
-        return this.remainingLife;
     }
 }
 

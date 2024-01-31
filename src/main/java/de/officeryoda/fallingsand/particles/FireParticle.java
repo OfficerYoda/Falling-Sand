@@ -9,7 +9,7 @@ public class FireParticle extends Particle {
 
     protected FireParticle(Grid grid, int index) {
         super(Colors.FIRE_COLOR, Colors.varyColor(Colors.FIRE_COLOR),
-                new Behavior[]{new FlammableBehavior((int) (75 + 50 * Math.random()))},
+                new Behavior[]{new FlammableBehavior((int) (10 + 100 * Math.random()), true, 1.0)},
                 grid, index,
                 false,true);
     }

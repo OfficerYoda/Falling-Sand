@@ -29,6 +29,7 @@ public class Grid {
     private final int width;
     @Getter
     private final int height;
+    @Getter
     private final int gridSize;
     @Getter
     private final Particle[] grid;
