@@ -2,19 +2,19 @@ package de.officeryoda.fallingsand.particles;
 
 import de.officeryoda.fallingsand.grid.Grid;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.util.ArrayList;
+import java.util.List;
 
 public class ParticleFactory {
 
-    private static final Map<Integer, Class<? extends Particle>> particleMap = new HashMap<>();
+    private static final List<Class<? extends Particle>> particleMap = new ArrayList<>();
     private static int selectedParticle = 1; // default: Sand
 
     static {
-        particleMap.put(0, EmptyParticle.class);
-        particleMap.put(1, SandParticle.class);
-        particleMap.put(2, WoodParticle.class);
-        particleMap.put(3, FireParticle.class);
+        particleMap.add(EmptyParticle.class);
+        particleMap.add(SandParticle.class);
+        particleMap.add(WoodParticle.class);
+        particleMap.add(FireParticle.class);
     }
 
     public static Particle createParticle(Grid grid, int index) {
@@ -23,7 +23,7 @@ public class ParticleFactory {
             try {
                 return particleClass.getDeclaredConstructor(Grid.class, int.class).newInstance(grid, index);
             } catch (Exception e) {
-                e.printStackTrace();
+                throw new ClassCastException("Class doesn't have required constructor (Grid, int)\n" + e);
             }
         }
         throw new IllegalArgumentException("Invalid particle ID: " + selectedParticle);
@@ -35,6 +35,6 @@ public class ParticleFactory {
 
     public static void nextParticle() {
         selectedParticle++;
-        selectedParticle %= particleMap.keySet().size();
+        selectedParticle %= particleMap.size();
     }
 }

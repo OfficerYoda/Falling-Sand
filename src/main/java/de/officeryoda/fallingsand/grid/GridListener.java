@@ -134,6 +134,11 @@ public class GridListener extends MouseAdapter implements MouseWheelListener {
         Grid.setCursorRadius(Grid.CURSOR_RADIUS - wheelRotation);
     }
 
+    private void nextParticle() {
+        ParticleFactory.nextParticle();
+        grid.updateCursorColors();
+    }
+
     @Override
     public void mousePressed(MouseEvent e) {
         switch(e.getButton()) {
@@ -165,8 +170,7 @@ public class GridListener extends MouseAdapter implements MouseWheelListener {
     public void mouseClicked(MouseEvent e) {
         super.mouseClicked(e);
         if(e.getButton() == MouseEvent.BUTTON2) {
-            ParticleFactory.nextParticle();
-            grid.updateCursorColors();
+            nextParticle();
         }
     }
 
@@ -186,8 +190,7 @@ public class GridListener extends MouseAdapter implements MouseWheelListener {
     public void mouseWheelMoved(MouseWheelEvent e) {
         super.mouseWheelMoved(e);
         if(middlePressed) {
-            ParticleFactory.nextParticle();
-            grid.updateCursorColors();
+            nextParticle();
         } else {
             changeCursorSize(e);
         }

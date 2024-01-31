@@ -16,7 +16,7 @@ public class GasMovesBehavior extends MovesBehavior {
     protected MovesResult possibleMoves(Grid grid, int i) {
         int gridWidth = grid.getWidth();
 
-        double nextDelta = Math.signum(this.velocity) * gridWidth;
+        double nextDelta = Math.signum(velocity) * gridWidth;
         int nextVertical = i + (int) nextDelta;
         int nextVerticalLeft = nextVertical - 1;
         int nextVerticalRight = nextVertical + 1;

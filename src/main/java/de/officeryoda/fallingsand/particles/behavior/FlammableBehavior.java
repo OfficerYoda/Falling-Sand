@@ -33,9 +33,9 @@ public class FlammableBehavior extends LimitedLifeBehavior {
     public void update(Particle particle, Grid grid, int direction) {
         if(chancesToIgnite > 0 && !burning) {
             // Check if we caught on fire
-            double chanceToCatch = chancesToIgnite * this.ignitionChance;
+            double chanceToCatch = chancesToIgnite * ignitionChance;
             if(Math.random() < chanceToCatch) {
-                this.burning = true;
+                burning = true;
             }
             chancesToIgnite = 0;
         }

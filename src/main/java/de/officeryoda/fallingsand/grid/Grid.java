@@ -108,16 +108,16 @@ public class Grid {
 
     private void updateParticles(int direction) {
         // backward to not double apply gravity to a particle
-        for(int row = this.height - 1; row >= 0; row--) {
-            var rowOffset = row * this.width;
-            var leftToRight = Math.random() > 0.5;
-            for(var i = 0; i < this.width; i++) {
+        for(int row = height - 1; row >= 0; row--) {
+            int rowOffset = row * width;
+            boolean leftToRight = Math.random() > 0.5;
+            for(int i = 0; i < width; i++) {
                 // Go from right to left or left to right depending on our random value
-                int columnOffset = leftToRight ? i : -i + this.width - 1;
+                int columnOffset = leftToRight ? i : -i + width - 1;
                 int index = rowOffset + columnOffset;
 
-                index = this.modifyIndexHook(index, direction);
-                Particle particle = this.grid[index];
+                index = modifyIndexHook(index, direction);
+                Particle particle = grid[index];
 
                 particle.update(direction);
             }
@@ -154,7 +154,7 @@ public class Grid {
 
     private int modifyIndexHook(int index, int direction) {
         if(direction == -1) {
-            return this.grid.length - index - 1;
+            return grid.length - index - 1;
         }
         return index;
     }
@@ -165,34 +165,41 @@ public class Grid {
     }
 
     public void set(int index, Particle particle) {
-//        if(index >= gridSize) return;
-        this.grid[index] = particle;
+        grid[index] = particle;
 
-        this.modifiedIndices.add(index);
+        modifiedIndices.add(index);
     }
 
     public Particle get(int index) {
         if(index < 0 || gridSize <= index) return new OutOfBoundsParticle();
-        return this.grid[index];
+        return grid[index];
     }
 
     public void swap(int indexA, int indexB) {
-        if(this.grid[indexA].isEmpty() && this.grid[indexB].isEmpty()) return;
-        Particle temp = this.grid[indexA];
-        this.grid[indexA] = this.grid[indexB];
-        this.setIndex(this.grid[indexB], indexA);
-        this.setIndex(temp, indexB);
+        if(grid[indexA].isEmpty() && grid[indexB].isEmpty()) return;
+        Particle temp = grid[indexA];
+        grid[indexA] = grid[indexB];
+        setIndex(grid[indexB], indexA);
+        setIndex(temp, indexB);
     }
 
     private void setIndex(Particle particle, int index) {
-        this.grid[index] = particle;
+        grid[index] = particle;
         particle.setIndex(index);
-        this.modifiedIndices.add(index);
+        modifiedIndices.add(index);
     }
 
     public boolean isEmpty(int index) {
         if(index >= gridSize) return false;
-        return this.grid[index].isEmpty();
+        return grid[index].isEmpty();
+    }
+
+    public void setCursorIndices(int @NotNull [] cursorIndices) {
+        this.cursorIndices = cursorIndices;
+
+        if(cursorIndices.length <= cursorColors.length) return;
+
+        updateCursorColors();
     }
 
     public void updateCursorColors() {
@@ -216,18 +223,10 @@ public class Grid {
     }
 
     public void clearIndex(int index) {
-        this.set(index, new EmptyParticle(this, index));
+        set(index, new EmptyParticle(this, index));
     }
 
     public void onModified(int index) {
-        this.modifiedIndices.add(index);
-    }
-
-    public void setCursorIndices(int @NotNull [] cursorIndices) {
-        this.cursorIndices = cursorIndices;
-
-        if(cursorIndices.length <= cursorColors.length) return;
-
-        updateCursorColors();
+        modifiedIndices.add(index);
     }
 }

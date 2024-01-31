@@ -92,7 +92,7 @@ public class MovesBehavior extends Behavior {
     }
 
     protected int getUpdateCount() {
-        double abs = Math.abs(this.velocity);
+        double abs = Math.abs(velocity);
         int floored = (int) abs;
         double remainder = abs - floored;
 
@@ -101,7 +101,7 @@ public class MovesBehavior extends Behavior {
     }
 
     protected boolean shouldUpdate(int direction) {
-        return direction == Math.signum(this.nextVelocity());
+        return direction == Math.signum(nextVelocity());
     }
 
     protected boolean canPassThrough(Particle particle) {
@@ -111,7 +111,7 @@ public class MovesBehavior extends Behavior {
     protected MovesResult possibleMoves(Grid grid, int i) {
         int gridWidth = grid.getWidth();
 
-        double nextDelta = Math.signum(this.velocity) * gridWidth;
+        double nextDelta = Math.signum(velocity) * gridWidth;
         int nextVertical = i + (int) nextDelta;
         int nextVerticalLeft = nextVertical - 1;
         int nextVerticalRight = nextVertical + 1;
@@ -142,21 +142,21 @@ public class MovesBehavior extends Behavior {
 
 
     protected void resetVelocity() {
-        this.velocity = 0;
+        velocity = 0;
     }
 
     protected void updateVelocity() {
-        this.velocity = nextVelocity();
+        velocity = nextVelocity();
     }
 
     protected double nextVelocity() {
-        if(this.velocity >= maxSpeed) {
+        if(velocity >= maxSpeed) {
             return maxSpeed;
         }
-        double newVelocity = this.velocity + this.acceleration;
+        double newVelocity = velocity + acceleration;
 
-        if(Math.abs(newVelocity) > this.maxSpeed) {
-            newVelocity = Math.signum(newVelocity) * this.maxSpeed;
+        if(Math.abs(newVelocity) > maxSpeed) {
+            newVelocity = Math.signum(newVelocity) * maxSpeed;
         }
         return newVelocity;
     }
