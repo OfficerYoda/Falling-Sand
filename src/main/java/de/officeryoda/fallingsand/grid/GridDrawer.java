@@ -1,5 +1,6 @@
-package de.officeryoda.fallingsand;
+package de.officeryoda.fallingsand.grid;
 
+import de.officeryoda.fallingsand.Colors;
 import org.jetbrains.annotations.NotNull;
 
 import javax.swing.*;
@@ -96,7 +97,7 @@ class GridPanel extends JPanel {
             paintClearedGrid(g);
             return;
         }
-        BufferedImage image = new BufferedImage(boundsRect.width, boundsRect.height, BufferedImage.TYPE_INT_RGB);
+        BufferedImage image = new BufferedImage(boundsRect.width, boundsRect.height, BufferedImage.TYPE_INT_ARGB);
         int[] imgColors = new int[boundsRect.width * boundsRect.height + 1];
 
         for(int x = 0; x < boundsRect.width; x++) {
@@ -189,7 +190,7 @@ class GridPanel extends JPanel {
         BufferedImage scaledImage = new BufferedImage(
                 image.getWidth() * scaleFactor,
                 image.getHeight() * scaleFactor,
-                BufferedImage.TYPE_INT_RGB);
+                BufferedImage.TYPE_INT_ARGB);
 
         Graphics2D g2d = scaledImage.createGraphics();
         g2d.setTransform(transform);
@@ -200,7 +201,15 @@ class GridPanel extends JPanel {
         return scaledImage;
     }
 
-    void setBoundsRect(Rectangle boundsRect) {
+    public Rectangle adjustToGridDimensions(Rectangle rect) {
+        int newWidth = Math.min(rect.width, gridWidth);
+        int newHeight = Math.min(rect.height, gridHeight);
+
+        return new Rectangle(rect.x, rect.y, newWidth, newHeight);
+    }
+
+    public void setBoundsRect(Rectangle boundsRect) {
+        boundsRect = adjustToGridDimensions(boundsRect);
         this.boundsRect = boundsRect;
     }
 }

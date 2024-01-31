@@ -1,6 +1,6 @@
-package de.officeryoda.fallingsand;
+package de.officeryoda.fallingsand.grid;
 
-import de.officeryoda.fallingsand.particle.ParticleFactory;
+import de.officeryoda.fallingsand.particles.ParticleFactory;
 
 import javax.swing.*;
 import java.awt.*;
@@ -42,7 +42,7 @@ public class GridListener extends MouseAdapter implements MouseWheelListener {
         for(int index : cursorIndices) {
             if(index < 0) continue;
             if(Math.random() < 0.5) {
-                grid.set(index, ParticleFactory.createParticle());
+                grid.set(index, ParticleFactory.createParticle(grid, index));
             }
         }
     }
@@ -85,7 +85,7 @@ public class GridListener extends MouseAdapter implements MouseWheelListener {
                 int newY = centerY + extY;
 
                 int sqrDst = sqrDistance(centerX, centerY, newX, newY);
-                if(sqrDst <= sqrRadius) {
+                if(sqrDst < sqrRadius) {
                     int index = newX + newY * width;
                     indices.add(index);
                 }
@@ -134,6 +134,11 @@ public class GridListener extends MouseAdapter implements MouseWheelListener {
         Grid.setCursorRadius(Grid.CURSOR_RADIUS - wheelRotation);
     }
 
+    private void nextParticle() {
+        ParticleFactory.nextParticle();
+        grid.updateCursorColors();
+    }
+
     @Override
     public void mousePressed(MouseEvent e) {
         switch(e.getButton()) {
@@ -162,6 +167,14 @@ public class GridListener extends MouseAdapter implements MouseWheelListener {
     }
 
     @Override
+    public void mouseClicked(MouseEvent e) {
+        super.mouseClicked(e);
+        if(e.getButton() == MouseEvent.BUTTON2) {
+            nextParticle();
+        }
+    }
+
+    @Override
     public void mouseEntered(MouseEvent e) {
         super.mouseEntered(e);
         setCursorIndices();
@@ -176,11 +189,10 @@ public class GridListener extends MouseAdapter implements MouseWheelListener {
     @Override
     public void mouseWheelMoved(MouseWheelEvent e) {
         super.mouseWheelMoved(e);
-        if(!middlePressed) {
-            changeCursorSize(e);
+        if(middlePressed) {
+            nextParticle();
         } else {
-            ParticleFactory.nextParticle();
-            grid.updateCursorColors();
+            changeCursorSize(e);
         }
     }
 }
