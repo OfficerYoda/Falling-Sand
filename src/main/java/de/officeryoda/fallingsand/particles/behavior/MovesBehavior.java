@@ -8,9 +8,9 @@ import java.util.List;
 
 public class MovesBehavior extends Behavior {
 
-    private final double maxSpeed;
-    private final double acceleration;
-    private double velocity;
+    protected final double maxSpeed;
+    protected final double acceleration;
+    protected double velocity;
 
     public MovesBehavior(double acceleration, double maxSpeed) {
         this.maxSpeed = maxSpeed;
@@ -91,26 +91,6 @@ public class MovesBehavior extends Behavior {
         throw new IllegalStateException("Shouldn't get here.");
     }
 
-    protected void resetVelocity() {
-        this.velocity = 0;
-    }
-
-    protected void updateVelocity() {
-        this.velocity = nextVelocity();
-    }
-
-    protected double nextVelocity() {
-        if(this.velocity >= maxSpeed) {
-            return maxSpeed;
-        }
-        double newVelocity = this.velocity + this.acceleration;
-
-        if(Math.abs(newVelocity) > this.maxSpeed) {
-            newVelocity = Math.signum(newVelocity) * this.maxSpeed;
-        }
-        return newVelocity;
-    }
-
     protected int getUpdateCount() {
         double abs = Math.abs(this.velocity);
         int floored = (int) abs;
@@ -158,6 +138,27 @@ public class MovesBehavior extends Behavior {
         }
 
         return new MovesResult(moves, weights);
+    }
+
+
+    protected void resetVelocity() {
+        this.velocity = 0;
+    }
+
+    protected void updateVelocity() {
+        this.velocity = nextVelocity();
+    }
+
+    protected double nextVelocity() {
+        if(this.velocity >= maxSpeed) {
+            return maxSpeed;
+        }
+        double newVelocity = this.velocity + this.acceleration;
+
+        if(Math.abs(newVelocity) > this.maxSpeed) {
+            newVelocity = Math.signum(newVelocity) * this.maxSpeed;
+        }
+        return newVelocity;
     }
 
     protected record MovesResult(List<Integer> moves, List<Integer> weights) {
