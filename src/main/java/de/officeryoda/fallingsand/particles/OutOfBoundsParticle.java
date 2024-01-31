@@ -1,7 +1,6 @@
-package de.officeryoda.fallingsand.particle;
+package de.officeryoda.fallingsand.particles;
 
-import de.officeryoda.fallingsand.grid.Grid;
-import de.officeryoda.fallingsand.particle.behavior.Behavior;
+import de.officeryoda.fallingsand.particles.behavior.Behavior;
 
 import java.awt.*;
 

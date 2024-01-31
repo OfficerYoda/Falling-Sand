@@ -1,11 +1,11 @@
-package de.officeryoda.fallingsand.particle;
+package de.officeryoda.fallingsand.particles;
 
 import de.officeryoda.fallingsand.Colors;
 import de.officeryoda.fallingsand.grid.Grid;
 import de.officeryoda.fallingsand.interfaces.LimitedLifeExecutor;
-import de.officeryoda.fallingsand.particle.behavior.Behavior;
-import de.officeryoda.fallingsand.particle.behavior.GasMovesBehavior;
-import de.officeryoda.fallingsand.particle.behavior.LimitedLife;
+import de.officeryoda.fallingsand.particles.behavior.Behavior;
+import de.officeryoda.fallingsand.particles.behavior.GasMovesBehavior;
+import de.officeryoda.fallingsand.particles.behavior.LimitedLifeBehavior;
 
 import java.awt.*;
 
@@ -14,7 +14,7 @@ public class SmokeParticle extends Particle {
     public SmokeParticle(Grid grid, int index) {
         super(Colors.SMOKE_COLOR, Colors.varyColor(Colors.SMOKE_COLOR, -0.05, 0.05, -0.05), new Behavior[]{
                 new GasMovesBehavior(-0.05, 0.25),
-                new LimitedLife(
+                new LimitedLifeBehavior(
                 // Each particle has 400 - 800 life (random)
                 (int) (400 + 400 * (Math.random())), new SmokeLifeExecutor())
         }, grid, index, false, true);
@@ -24,14 +24,14 @@ public class SmokeParticle extends Particle {
 class SmokeLifeExecutor implements LimitedLifeExecutor {
 
     @Override
-    public void onTick(LimitedLife behavior, Particle particle) {
+    public void onTick(LimitedLifeBehavior behavior, Particle particle) {
         Color color = particle.getColor();
         int alpha = (int) Math.floor(255.0 * behavior.getRemainingLife() / behavior.getLifetime());
         particle.setColor(changeAlpha(color, alpha));
     }
 
     @Override
-    public void onDeath(LimitedLife behavior, Particle particle, Grid grid) {
+    public void onDeath(LimitedLifeBehavior behavior, Particle particle, Grid grid) {
         grid.clearIndex(particle.index);
     }
 

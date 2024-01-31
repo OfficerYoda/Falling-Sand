@@ -1,20 +1,20 @@
-package de.officeryoda.fallingsand.particle.behavior;
+package de.officeryoda.fallingsand.particles.behavior;
 
 import de.officeryoda.fallingsand.grid.Grid;
 import de.officeryoda.fallingsand.interfaces.LimitedLifeExecutor;
 import de.officeryoda.fallingsand.interfaces.TriConsumer;
-import de.officeryoda.fallingsand.particle.Particle;
+import de.officeryoda.fallingsand.particles.Particle;
 
 import java.util.function.BiConsumer;
 
-public class LimitedLife extends Behavior {
+public class LimitedLifeBehavior extends Behavior {
 
     private final int lifetime;
-    private final BiConsumer<LimitedLife, Particle> onTick;
-    private final TriConsumer<LimitedLife, Particle, Grid> onDeath;
+    private final BiConsumer<LimitedLifeBehavior, Particle> onTick;
+    private final TriConsumer<LimitedLifeBehavior, Particle, Grid> onDeath;
     private int remainingLife;
 
-    public LimitedLife(int lifetime, LimitedLifeExecutor lifeExecutor) {
+    public LimitedLifeBehavior(int lifetime, LimitedLifeExecutor lifeExecutor) {
         this.lifetime = lifetime;
         this.remainingLife = lifetime;
         if (lifeExecutor != null) {

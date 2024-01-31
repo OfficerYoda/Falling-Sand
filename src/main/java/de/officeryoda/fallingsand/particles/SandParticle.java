@@ -1,9 +1,9 @@
-package de.officeryoda.fallingsand.particle;
+package de.officeryoda.fallingsand.particles;
 
 import de.officeryoda.fallingsand.Colors;
 import de.officeryoda.fallingsand.grid.Grid;
-import de.officeryoda.fallingsand.particle.behavior.Behavior;
-import de.officeryoda.fallingsand.particle.behavior.MovesBehavior;
+import de.officeryoda.fallingsand.particles.behavior.Behavior;
+import de.officeryoda.fallingsand.particles.behavior.MovesBehavior;
 
 public class SandParticle extends Particle {
 

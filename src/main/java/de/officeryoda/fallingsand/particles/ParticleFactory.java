@@ -1,4 +1,4 @@
-package de.officeryoda.fallingsand.particle;
+package de.officeryoda.fallingsand.particles;
 
 import de.officeryoda.fallingsand.grid.Grid;
 
@@ -15,6 +15,7 @@ public class ParticleFactory {
         particleMap.put(1, SandParticle.class);
         particleMap.put(2, WoodParticle.class);
         particleMap.put(3, SmokeParticle.class);
+        particleMap.put(4, FireParticle.class);
     }
 
     public static Particle createParticle(Grid grid, int index) {

@@ -1,6 +1,6 @@
 package de.officeryoda.fallingsand.grid;
 
-import de.officeryoda.fallingsand.particle.ParticleFactory;
+import de.officeryoda.fallingsand.particles.ParticleFactory;
 
 import javax.swing.*;
 import java.awt.*;

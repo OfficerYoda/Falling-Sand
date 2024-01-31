@@ -29,6 +29,10 @@ public class Colors {
     public static final Color SMOKE_COLOR = Color.decode("#4C4A4D");
 
     /**
+     * The color representing fire particles in the simulation.
+     */
+    public static final Color FIRE_COLOR = Color.decode("#e34f0f");
+    /**
      * Varies the given color based on saturation and lightness adjustments.
      *
      * @param colorInt         The RGB representation of the color to be varied.

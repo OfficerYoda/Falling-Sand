@@ -1,29 +1,38 @@
-package de.officeryoda.fallingsand.particle;
+package de.officeryoda.fallingsand.particles;
 
 import de.officeryoda.fallingsand.grid.Grid;
-import de.officeryoda.fallingsand.particle.behavior.Behavior;
+import de.officeryoda.fallingsand.particles.behavior.Behavior;
+import lombok.Getter;
+import lombok.Setter;
 
 import java.awt.*;
 
 public abstract class Particle {
 
+    @Getter
     protected Color baseColor;
+    @Setter
+    @Getter
     protected Color color;
     protected Behavior[] behaviors;
     protected Grid grid;
+    @Setter
+    @Getter
     protected int index;
 
-    protected boolean isEmpty;
-    protected boolean isAiry;
+    @Getter
+    protected boolean empty;
+    @Getter
+    protected boolean airy;
 
-    protected Particle(Color baseColor, Color color, Behavior[] behaviors, Grid grid, int index, boolean isEmpty, boolean isAiry) {
+    protected Particle(Color baseColor, Color color, Behavior[] behaviors, Grid grid, int index, boolean empty, boolean airy) {
         this.baseColor = baseColor;
         this.color = color;
         this.behaviors = behaviors;
         this.grid = grid;
         this.index = index;
-        this.isEmpty = isEmpty;
-        this.isAiry = isAiry;
+        this.empty = empty;
+        this.airy = airy;
     }
 
     protected Particle(Color baseColor, Color color, Behavior[] behaviors, Grid grid, int index, boolean isEmpty) {
@@ -38,33 +47,5 @@ public abstract class Particle {
         for(Behavior behavior : behaviors) {
             behavior.update(this, grid, direction);
         }
-    }
-
-    public Color getColor() {
-        return color;
-    }
-
-    public void setColor(Color color) {
-        this.color = color;
-    }
-
-    public Color getBaseColor() {
-        return this.baseColor;
-    }
-
-    public int getIndex() {
-        return index;
-    }
-
-    public void setIndex(int index) {
-        this.index = index;
-    }
-
-    public boolean isEmpty() {
-        return this.isEmpty;
-    }
-
-    public boolean isAiry() {
-        return this.isAiry;
     }
 }

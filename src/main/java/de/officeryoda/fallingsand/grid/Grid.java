@@ -1,10 +1,12 @@
 package de.officeryoda.fallingsand.grid;
 
 import de.officeryoda.fallingsand.Colors;
-import de.officeryoda.fallingsand.particle.EmptyParticle;
-import de.officeryoda.fallingsand.particle.OutOfBoundsParticle;
-import de.officeryoda.fallingsand.particle.Particle;
-import de.officeryoda.fallingsand.particle.ParticleFactory;
+import de.officeryoda.fallingsand.particles.EmptyParticle;
+import de.officeryoda.fallingsand.particles.OutOfBoundsParticle;
+import de.officeryoda.fallingsand.particles.Particle;
+import de.officeryoda.fallingsand.particles.ParticleFactory;
+import lombok.Getter;
+import lombok.Setter;
 import org.jetbrains.annotations.NotNull;
 
 import javax.swing.*;
@@ -23,18 +25,26 @@ public class Grid {
     public static CountDownLatch DRAW_FINISHED_LATCH = new CountDownLatch(1);
     public static int CURSOR_RADIUS = 5;
 
+    @Getter
     private final int width;
+    @Getter
     private final int height;
     private final int gridSize;
+    @Getter
     private final Particle[] grid;
 
     private final Set<Integer> modifiedIndices;
+    @Getter
     private boolean cleared; // if we cleared all pixels last update
     private Rectangle lastUpdateRect;
     private GridDrawer gridDrawer;
+    @Setter
     private GridListener gridListener;
+    @Getter
     private int[] cursorIndices = new int[0];
+    @Getter
     private Color[] cursorColors = new Color[0];
+    @Getter
     private long lastUpdate = System.currentTimeMillis();
 
     public Grid(int windowWidth, int windowHeight, int cellSize) {
@@ -212,45 +222,11 @@ public class Grid {
         this.modifiedIndices.add(index);
     }
 
-    /// Getters and Setters
-
-    public int getWidth() {
-        return width;
-    }
-
-    public int getHeight() {
-        return height;
-    }
-
-    public int[] getCursorIndices() {
-        return this.cursorIndices;
-    }
-
     public void setCursorIndices(int @NotNull [] cursorIndices) {
         this.cursorIndices = cursorIndices;
 
         if(cursorIndices.length <= cursorColors.length) return;
 
         updateCursorColors();
-    }
-
-    public Color[] getCursorColors() {
-        return this.cursorColors;
-    }
-
-    public long getLastUpdate() {
-        return this.lastUpdate;
-    }
-
-    public boolean isCleared() {
-        return this.cleared;
-    }
-
-    public void setGridListener(GridListener gridListener) {
-        this.gridListener = gridListener;
-    }
-
-    public Particle[] getGrid() {
-        return this.grid;
     }
 }
