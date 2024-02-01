@@ -2,7 +2,6 @@ package de.officeryoda.fallingsand.particles;
 
 import de.officeryoda.fallingsand.grid.Grid;
 import de.officeryoda.fallingsand.particles.behavior.Behavior;
-import de.officeryoda.fallingsand.particles.behavior.FlammableBehavior;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -14,39 +13,45 @@ import java.util.Map;
 public abstract class Particle {
 
     @Getter
+    protected final double brushSpawnChance;
+    private final Map<Class<? extends Behavior>, Behavior> behaviorLookup = new HashMap<>();
+    @Getter
     protected Color baseColor;
     @Setter
     @Getter
     protected Color color;
     protected Behavior[] behaviors;
-    private final Map<Class<? extends Behavior>, Behavior> behaviorLookup = new HashMap<>();
     protected Grid grid;
     @Setter
     @Getter
     protected int index;
-
     @Getter
     protected boolean empty;
     @Getter
     protected boolean airy;
 
-    protected Particle(Color baseColor, Color color, Behavior[] behaviors, Grid grid, int index, boolean empty, boolean airy) {
+    protected Particle(Color baseColor, Color color, Behavior[] behaviors, Grid grid, int index, double brushSpawnChance, boolean empty, boolean airy) {
         this.baseColor = baseColor;
         this.color = color;
         this.behaviors = behaviors;
         Arrays.stream(behaviors).forEach(behavior -> behaviorLookup.put(behavior.getClass(), behavior));
         this.grid = grid;
         this.index = index;
+        this.brushSpawnChance = brushSpawnChance;
         this.empty = empty;
         this.airy = airy;
     }
 
-    protected Particle(Color baseColor, Color color, Behavior[] behaviors, Grid grid, int index, boolean isEmpty) {
-        this(baseColor, color, behaviors, grid, index, isEmpty, false);
+    protected Particle(Color baseColor, Color color, Behavior[] behaviors, Grid grid, int index, double brushSpawnChance, boolean isEmpty) {
+        this(baseColor, color, behaviors, grid, index, brushSpawnChance, isEmpty, false);
+    }
+
+    protected Particle(Color baseColor, Color color, Behavior[] behaviors, Grid grid, int index,double brushSpawnChance) {
+        this(baseColor, color, behaviors, grid, index, brushSpawnChance, false);
     }
 
     protected Particle(Color baseColor, Color color, Behavior[] behaviors, Grid grid, int index) {
-        this(baseColor, color, behaviors, grid, index, false, false);
+        this(baseColor, color, behaviors, grid, index, 1.0);
     }
 
     public void update(int direction) {

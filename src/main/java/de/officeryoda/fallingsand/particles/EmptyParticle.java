@@ -8,7 +8,7 @@ public class EmptyParticle extends Particle {
     public EmptyParticle(Grid grid, int index) {
         super(Colors.BACKGROUND_COLOR, Colors.BACKGROUND_COLOR,
                 new Behavior[]{},
-                grid, index,
+                grid, index, 1,
                 true);
     }
 }

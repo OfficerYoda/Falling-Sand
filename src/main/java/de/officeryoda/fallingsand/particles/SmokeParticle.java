@@ -17,8 +17,7 @@ public class SmokeParticle extends Particle {
                                 new FlammableBehavior((int) (200 + 400 * (Math.random())), true, 1.0, new BurningSmokeLifeExecutor()) :
                                 new LimitedLifeBehavior((int) (400 + 400 * (Math.random())), new SmokeLifeExecutor())
                 },
-                grid,
-                index,
+                grid, index, 1.0,
                 false,
                 true);
     }

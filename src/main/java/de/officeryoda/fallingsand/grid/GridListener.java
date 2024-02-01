@@ -39,9 +39,11 @@ public class GridListener extends MouseAdapter implements MouseWheelListener {
 
         if(!leftPressed) return;
 //        grid.set(cursorIndices[0], ParticleFactory.createParticle());
+        double spawnChance = ParticleFactory.createDummyParticle().getBrushSpawnChance();
+
         for(int index : cursorIndices) {
             if(index < 0) continue;
-            if(Math.random() < 0.5) {
+            if(Math.random() < spawnChance) {
                 grid.set(index, ParticleFactory.createParticle(grid, index));
             }
         }
@@ -89,30 +91,6 @@ public class GridListener extends MouseAdapter implements MouseWheelListener {
                     int index = newX + newY * width;
                     indices.add(index);
                 }
-            }
-        }
-
-        int gridSize = grid.getWidth() * grid.getHeight();
-        return indices.stream()
-                .mapToInt(Integer::intValue)
-                .filter(value -> 0 <= value && value < gridSize)
-                .toArray();
-    }
-
-    private int[] getIndicesInSquare(int centerIndex, int radius) {
-        int width = grid.getWidth();
-        int centerX = centerIndex % width;
-        int centerY = centerIndex / width;
-
-        List<Integer> indices = new ArrayList<>();
-
-        for(int extX = -radius; extX <= radius; extX++) {
-            for(int extY = -radius; extY <= radius; extY++) {
-                int newX = (centerX + extX + width) % width; // Ensure no wrap-around for X
-                int newY = centerY + extY;
-
-                int index = newX + newY * width;
-                indices.add(index);
             }
         }
 

@@ -140,7 +140,6 @@ public class MovesBehavior extends Behavior {
         return new MovesResult(moves, weights);
     }
 
-
     protected void resetVelocity() {
         velocity = 0;
     }
