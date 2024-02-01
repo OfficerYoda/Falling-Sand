@@ -15,6 +15,7 @@ public class ParticleFactory {
         particleMap.add(SandParticle.class);
         particleMap.add(WoodParticle.class);
         particleMap.add(FireParticle.class);
+        particleMap.add(WaterParticle.class);
     }
 
     public static Particle createParticle(Grid grid, int index) {

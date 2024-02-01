@@ -2,18 +2,19 @@ package de.officeryoda.fallingsand.particles.behavior;
 
 import de.officeryoda.fallingsand.grid.Grid;
 import de.officeryoda.fallingsand.particles.Particle;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class GasMovesBehavior extends MovesBehavior {
+public class GasMoveBehavior extends MoveBehavior {
 
-    public GasMovesBehavior(double acceleration, double maxSpeed) {
+    public GasMoveBehavior(double acceleration, double maxSpeed) {
         super(acceleration, maxSpeed);
     }
 
     @Override
-    protected MovesResult possibleMoves(Grid grid, int i) {
+    protected MovesResult possibleMoves(@NotNull Grid grid, int i) {
         int gridWidth = grid.getWidth();
 
         double nextDelta = Math.signum(velocity) * gridWidth;
@@ -46,7 +47,7 @@ public class GasMovesBehavior extends MovesBehavior {
     }
 
     @Override
-    protected boolean canPassThrough(Particle particle) {
+    protected boolean canPassThrough(@NotNull Particle particle) {
         return particle.isEmpty();
     }
 }

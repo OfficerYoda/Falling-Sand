@@ -32,6 +32,12 @@ public class Colors {
      * The color representing fire particles in the simulation.
      */
     public static final Color FIRE_COLOR = Color.decode("#e34f0f");
+
+    /**
+     * The color representing water particles in the simulation.
+     */
+    public static final Color WATER_COLOR = Color.decode("#3556db");
+
     /**
      * Varies the given color based on saturation and lightness adjustments.
      *

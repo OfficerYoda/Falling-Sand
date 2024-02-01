@@ -29,8 +29,10 @@ public abstract class Particle {
     protected boolean empty;
     @Getter
     protected boolean airy;
+    @Getter
+    protected boolean fluid;
 
-    protected Particle(Color baseColor, Color color, Behavior[] behaviors, Grid grid, int index, double brushSpawnChance, boolean empty, boolean airy) {
+    protected Particle(Color baseColor, Color color, Behavior[] behaviors, Grid grid, int index, double brushSpawnChance, boolean empty, boolean airy, boolean fluid) {
         this.baseColor = baseColor;
         this.color = color;
         this.behaviors = behaviors;
@@ -40,18 +42,19 @@ public abstract class Particle {
         this.brushSpawnChance = brushSpawnChance;
         this.empty = empty;
         this.airy = airy;
+        this.fluid = fluid;
     }
 
-    protected Particle(Color baseColor, Color color, Behavior[] behaviors, Grid grid, int index, double brushSpawnChance, boolean isEmpty) {
-        this(baseColor, color, behaviors, grid, index, brushSpawnChance, isEmpty, false);
+    protected Particle(Color baseColor, Color color, Behavior[] behaviors, Grid grid, int index, double brushSpawnChance, boolean empty, boolean airy) {
+        this(baseColor, color, behaviors, grid, index, brushSpawnChance, empty, airy, false);
+    }
+
+    protected Particle(Color baseColor, Color color, Behavior[] behaviors, Grid grid, int index, double brushSpawnChance, boolean empty) {
+        this(baseColor, color, behaviors, grid, index, brushSpawnChance, empty, false);
     }
 
     protected Particle(Color baseColor, Color color, Behavior[] behaviors, Grid grid, int index,double brushSpawnChance) {
         this(baseColor, color, behaviors, grid, index, brushSpawnChance, false);
-    }
-
-    protected Particle(Color baseColor, Color color, Behavior[] behaviors, Grid grid, int index) {
-        this(baseColor, color, behaviors, grid, index, 1.0);
     }
 
     public void update(int direction) {

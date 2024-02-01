@@ -2,17 +2,19 @@ package de.officeryoda.fallingsand.particles.behavior;
 
 import de.officeryoda.fallingsand.grid.Grid;
 import de.officeryoda.fallingsand.particles.Particle;
+import de.officeryoda.fallingsand.particles.behavior.Behavior;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class MovesBehavior extends Behavior {
+public class MoveBehavior extends Behavior {
 
     protected final double maxSpeed;
     protected final double acceleration;
     protected double velocity;
 
-    public MovesBehavior(double acceleration, double maxSpeed) {
+    public MoveBehavior(double acceleration, double maxSpeed) {
         this.maxSpeed = maxSpeed;
         this.velocity = 0;
         this.acceleration = acceleration;
@@ -52,7 +54,7 @@ public class MovesBehavior extends Behavior {
         }
     }
 
-    protected void step(Particle particle, Grid grid) {
+    protected void step(@NotNull Particle particle, @NotNull Grid grid) {
         int i = particle.getIndex();
         if(grid.isEmpty(i)) { // OPT could be replaced with 'particle.isEmpty()' but leaving it in for now
             resetVelocity();
@@ -72,7 +74,7 @@ public class MovesBehavior extends Behavior {
         grid.swap(i, choice);
     }
 
-    protected int choose(List<Integer> moves, List<Integer> weights) {
+    protected int choose(@NotNull List<Integer> moves, @NotNull List<Integer> weights) {
         if(moves.size() != weights.size()) {
             throw new IllegalArgumentException("Array and weights must be the same length");
         }
@@ -104,11 +106,11 @@ public class MovesBehavior extends Behavior {
         return direction == Math.signum(nextVelocity());
     }
 
-    protected boolean canPassThrough(Particle particle) {
-        return particle.isEmpty() || particle.isAiry();
+    protected boolean canPassThrough(@NotNull Particle particle) {
+        return particle.isEmpty() || particle.isAiry() || particle.isFluid();
     }
 
-    protected MovesResult possibleMoves(Grid grid, int i) {
+    protected MovesResult possibleMoves(@NotNull Grid grid, int i) {
         int gridWidth = grid.getWidth();
 
         double nextDelta = Math.signum(velocity) * gridWidth;

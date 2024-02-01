@@ -9,6 +9,6 @@ public class OutOfBoundsParticle extends Particle{
     public OutOfBoundsParticle() {
         super(Color.pink, Color.pink,
                 new Behavior[]{},
-                null, -1);
+                null, -1, 1.0);
     }
 }
