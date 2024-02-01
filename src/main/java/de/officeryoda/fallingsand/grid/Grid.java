@@ -18,7 +18,7 @@ import java.util.concurrent.TimeUnit;
 
 public class Grid {
 
-    public static final int UPDATES_PER_SECOND = 50;
+    public static final int UPDATES_PER_SECOND = 100;
     public static final int UPDATE_INTERVAL = (int) (1f / UPDATES_PER_SECOND * 1000); // time in ms
     private static final int TIMEOUT_TIME_MS = 100;
 

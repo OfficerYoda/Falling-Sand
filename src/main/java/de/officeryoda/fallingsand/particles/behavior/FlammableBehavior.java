@@ -1,10 +1,12 @@
 package de.officeryoda.fallingsand.particles.behavior;
 
+import de.officeryoda.fallingsand.Colors;
 import de.officeryoda.fallingsand.grid.Grid;
 import de.officeryoda.fallingsand.interfaces.LimitedLifeExecutor;
 import de.officeryoda.fallingsand.particles.Particle;
 import de.officeryoda.fallingsand.particles.behavior.executors.FlammableExecutor;
 import lombok.Getter;
+import lombok.Setter;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
@@ -17,6 +19,9 @@ public class FlammableBehavior extends LimitedLifeBehavior {
     private double chancesToIgnite;
     @Getter
     private boolean burning;
+    @Getter
+    @Setter
+    private boolean extinguished;
 
     public FlammableBehavior(int lifetime, boolean burning, double ignitionChance, LimitedLifeExecutor lifeExecutor) {
         super(lifetime, lifeExecutor);
@@ -31,41 +36,53 @@ public class FlammableBehavior extends LimitedLifeBehavior {
 
     @Override
     public void update(Particle particle, Grid grid, int direction) {
+        if(extinguished && burning) {
+            burning = false;
+        }
+
         if(chancesToIgnite > 0 && !burning) {
             // Check if we caught on fire
             double chanceToCatch = chancesToIgnite * ignitionChance;
             if(Math.random() < chanceToCatch) {
                 burning = true;
+                extinguished = false;
             }
             chancesToIgnite = 0;
         }
+
         // If we're burning, update our remaining
         // life and try to spread more fire.
         if(burning) {
             super.update(particle, grid, direction);
-            tryToSpread(particle, grid);
         }
+
+        processNeighbours(particle, grid);
     }
 
-    private void tryToSpread(Particle particle, Grid grid) {
-        List<Integer> candidates = getSpreadCandidates(particle, grid);
+    private void processNeighbours(Particle particle, Grid grid) {
+        List<Integer> candidates = getNeighbours(particle, grid);
         candidates.forEach((index) -> {
             Particle p = grid.get(index);
             FlammableBehavior flammable = p.getBehavior(FlammableBehavior.class);
             if(flammable != null) {
-                flammable.chancesToIgnite += 0.5 + Math.random() * 0.5;
+                if(extinguished) {
+                    if(flammable.isBurning() && Math.random() < 0.015) // 1.5% chance to extinguish neighbouring burning particles
+                        flammable.extinguish(grid.get(index));
+                } else if(burning) {
+                        flammable.chancesToIgnite += 0.5 + Math.random() * 0.5;
+                }
             }
         });
     }
 
-    private @NotNull List<Integer> getSpreadCandidates(@NotNull Particle particle, @NotNull Grid grid) {
+    private @NotNull List<Integer> getNeighbours(@NotNull Particle particle, @NotNull Grid grid) {
         int index = particle.getIndex();
-
         int gridWidth = grid.getWidth();
         int gridSize = grid.getGridSize();
-
         int column = index % gridWidth;
+
         List<Integer> candidates = new ArrayList<>();
+
         // Each of the 8 directions
         for(int dx = -1; dx <= 1; dx++) {
             for(int dy = -1; dy <= 1; dy++) {
@@ -82,6 +99,12 @@ public class FlammableBehavior extends LimitedLifeBehavior {
         }
 
         return candidates;
+    }
+
+    public void extinguish(Particle particle) {
+        if(extinguished) return;
+        extinguished = true;
+        particle.setColor(Colors.varyColor(particle.getBaseColor()));
     }
 }
 

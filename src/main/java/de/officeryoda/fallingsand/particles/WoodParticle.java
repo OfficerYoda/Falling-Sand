@@ -10,6 +10,9 @@ public class WoodParticle extends Particle {
     public WoodParticle(Grid grid, int index) {
         super(Colors.WOOD_COLOR, Colors.varyColor(Colors.WOOD_COLOR),
                 new Behavior[]{new FlammableBehavior((int) (200 + 100 * Math.random()), false, 0.007)},
+//                new Behavior[]{new FlammableBehavior(100000, false, 0.007)},
                 grid, index, 1.0);
+
+//        System.out.println("Long burning Wood");
     }
 }

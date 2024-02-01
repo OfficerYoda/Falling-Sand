@@ -36,7 +36,7 @@ public class Colors {
     /**
      * The color representing water particles in the simulation.
      */
-    public static final Color WATER_COLOR = Color.decode("#3556db");
+    public static final Color WATER_COLOR = Color.decode("#0058A5");
 
     /**
      * Varies the given color based on saturation and lightness adjustments.

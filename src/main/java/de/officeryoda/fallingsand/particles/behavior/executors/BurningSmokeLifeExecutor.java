@@ -3,13 +3,14 @@ package de.officeryoda.fallingsand.particles.behavior.executors;
 import de.officeryoda.fallingsand.grid.Grid;
 import de.officeryoda.fallingsand.particles.Particle;
 import de.officeryoda.fallingsand.particles.behavior.LimitedLifeBehavior;
+import org.jetbrains.annotations.NotNull;
 
 import java.awt.*;
 
 public class BurningSmokeLifeExecutor extends FlammableExecutor {
 
     @Override
-    public void onTick(LimitedLifeBehavior behavior, Particle particle) {
+    public void onTick(@NotNull LimitedLifeBehavior behavior, @NotNull Particle particle) {
         super.onTick(behavior, particle);
 
         Color color = particle.getColor();
@@ -18,7 +19,7 @@ public class BurningSmokeLifeExecutor extends FlammableExecutor {
     }
 
     @Override
-    public void onDeath(LimitedLifeBehavior behavior, Particle particle, Grid grid) {
+    public void onDeath(LimitedLifeBehavior behavior, @NotNull Particle particle, Grid grid) {
         grid.clearIndex(particle.getIndex());
     }
 

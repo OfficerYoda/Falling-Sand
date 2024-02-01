@@ -5,6 +5,7 @@ import de.officeryoda.fallingsand.interfaces.LimitedLifeExecutor;
 import de.officeryoda.fallingsand.particles.Particle;
 import de.officeryoda.fallingsand.particles.SmokeParticle;
 import de.officeryoda.fallingsand.particles.behavior.LimitedLifeBehavior;
+import org.jetbrains.annotations.NotNull;
 
 import java.awt.*;
 
@@ -19,7 +20,7 @@ public class FlammableExecutor implements LimitedLifeExecutor {
     };
 
     @Override
-    public void onTick(LimitedLifeBehavior behavior, Particle particle) {
+    public void onTick(@NotNull LimitedLifeBehavior behavior, @NotNull Particle particle) {
         double frequency = Math.sqrt((double) behavior.getLifetime() / behavior.getRemainingLife());
         double period = frequency * colors.length;
         double pct = behavior.getRemainingLife() / period;
@@ -28,7 +29,7 @@ public class FlammableExecutor implements LimitedLifeExecutor {
     }
 
     @Override
-    public void onDeath(LimitedLifeBehavior behavior, Particle particle, Grid grid) {
+    public void onDeath(LimitedLifeBehavior behavior, @NotNull Particle particle, Grid grid) {
         int index = particle.getIndex();
         SmokeParticle smoke = new SmokeParticle(grid, index);
         grid.set(index, smoke);
