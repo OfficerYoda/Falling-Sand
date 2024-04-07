@@ -1,4 +1,4 @@
-# Falling Sand Game
+# Falling Sand
 
 This project is a Java-based implementation of the Falling Sand game.
 
