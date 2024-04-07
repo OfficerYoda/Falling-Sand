@@ -11,10 +11,10 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 public class FlammableBehavior extends LimitedLifeBehavior {
 
-    private final int fuel = (int) (10 + 100 * (Math.random()));
     private final double ignitionChance;
     private double chancesToIgnite;
     @Getter
@@ -60,19 +60,34 @@ public class FlammableBehavior extends LimitedLifeBehavior {
     }
 
     private void processNeighbours(Particle particle, Grid grid) {
+        AtomicBoolean extinguishNeighbours = new AtomicBoolean(false);
         List<Integer> candidates = getNeighbours(particle, grid);
+
         candidates.forEach((index) -> {
             Particle p = grid.get(index);
+
             FlammableBehavior flammable = p.getBehavior(FlammableBehavior.class);
             if(flammable != null) {
                 if(extinguished) {
-                    if(flammable.isBurning() && Math.random() < 0.015) // 1.5% chance to extinguish neighbouring burning particles
+                    // needed so that it doesn't create a one thick layer of extinguished particles between fire and water
+                    if(flammable.isBurning() && Math.random() < 0.015) { // 1.5% chance to extinguish neighbouring burning particles
                         flammable.extinguish(grid.get(index));
+                    }
                 } else if(burning) {
-                        flammable.chancesToIgnite += 0.5 + Math.random() * 0.5;
+                    flammable.chancesToIgnite += 0.5 + Math.random() * 0.5;
                 }
             }
+
+            ExtinguishBehavior extinguish = p.getBehavior(ExtinguishBehavior.class);
+            if(extinguish != null) {
+                extinguishNeighbours.set(true);
+            }
         });
+
+        // if no neighbours are extinguisher particles (water), un-extinguished ourselves
+        if(!extinguishNeighbours.get()) {
+            extinguished = false;
+        }
     }
 
     private @NotNull List<Integer> getNeighbours(@NotNull Particle particle, @NotNull Grid grid) {

@@ -12,6 +12,7 @@ public class ExtinguishBehavior extends Behavior{
         int gridSize = grid.getGridSize();
         int column = index % gridWidth;
 
+        // check neighbours
         for(int dx = -1; dx <= 1; dx++) {
             for(int dy = -1; dy <= 1; dy++) {
                 int di = index + dx + dy * gridWidth;
