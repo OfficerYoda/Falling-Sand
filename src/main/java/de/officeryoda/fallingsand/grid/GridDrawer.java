@@ -32,6 +32,7 @@ public class GridDrawer extends JFrame {
         GridListener gridListener = new GridListener(grid, cellSize, this);
         addMouseListener(gridListener);
         addMouseWheelListener(gridListener);
+        addKeyListener(gridListener);
 
         setInvisibleCursor();
 
@@ -161,7 +162,6 @@ class GridPanel extends JPanel {
 
         int fps = (int) (1000 / deltaTime);
 
-        int screenWidth = getWidth();
         int screenHeight = getHeight();
 
         int fontSize = screenHeight / 30; // Adjust the divisor for the desired scaling

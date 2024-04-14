@@ -47,6 +47,9 @@ public class Grid {
     private Color[] cursorColors = new Color[0];
     @Getter
     private long lastUpdate = System.currentTimeMillis();
+    @Getter
+    @Setter
+    private boolean paused = false;
 
     public Grid(int windowWidth, int windowHeight, int cellSize) {
         windowWidth -= windowWidth % cellSize;
@@ -91,6 +94,8 @@ public class Grid {
     }
 
     private void update() {
+        if(paused) return;
+
         cleared = false;
         modifiedIndices.clear();
 

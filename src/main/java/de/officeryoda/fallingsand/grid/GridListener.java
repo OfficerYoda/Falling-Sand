@@ -4,14 +4,11 @@ import de.officeryoda.fallingsand.particles.ParticleFactory;
 
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
-import java.awt.event.MouseWheelEvent;
-import java.awt.event.MouseWheelListener;
+import java.awt.event.*;
 import java.util.ArrayList;
 import java.util.List;
 
-public class GridListener extends MouseAdapter implements MouseWheelListener {
+public class GridListener extends MouseAdapter implements MouseWheelListener, KeyListener {
 
     private final Grid grid;
     private final int cellSize;
@@ -173,4 +170,17 @@ public class GridListener extends MouseAdapter implements MouseWheelListener {
             changeCursorSize(e);
         }
     }
+
+    @Override
+    public void keyPressed(KeyEvent e) {
+        if(e.getKeyCode() == KeyEvent.VK_P) {
+            grid.setPaused(!grid.isPaused());
+        }
+    }
+
+    @Override
+    public void keyTyped(KeyEvent e) {}
+
+    @Override
+    public void keyReleased(KeyEvent e) {}
 }

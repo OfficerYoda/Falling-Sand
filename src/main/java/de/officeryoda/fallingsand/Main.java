@@ -7,6 +7,6 @@ public class Main {
     public static void main(String[] args) {
         System.out.println("Falling Sand!");
 
-        Grid grid = new Grid(1440, 720 - GridDrawer.TITLE_BAR_HEIGHT, 4);
+        Grid grid = new Grid(1080, 720 - GridDrawer.TITLE_BAR_HEIGHT, 4);
     }
 }
